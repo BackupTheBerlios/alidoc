@@ -1,0 +1,136 @@
+<!--
+     The FreeBSD Italian Documentation Project
+
+     $FreeBSD$
+-->
+
+<!DOCTYPE book PUBLIC "-//FreeBSD//DTD DocBook V4.1-Based Extension//EN" [
+<!ENTITY % man PUBLIC "-//FreeBSD//ENTITIES DocBook Manual Page Entities//EN">
+%man;
+
+<!ENTITY % bookinfo PUBLIC "-//FreeBSD//ENTITIES DocBook BookInfo Entities//IT">
+%bookinfo;
+
+<!ENTITY % freebsd PUBLIC "-//FreeBSD//ENTITIES DocBook Miscellaneous FreeBSD Entities//EN">
+%freebsd;
+
+<!ENTITY % mailing-lists PUBLIC "-//FreeBSD//ENTITIES DocBook Mailing List Entities//IT">
+%mailing-lists;
+
+<!ENTITY % newsgroups PUBLIC "-//FreeBSD//ENTITIES DocBook Newsgroup Entities//EN">
+%newsgroups;
+
+<!ENTITY % it-trademarks PUBLIC "-//FreeBSD//ENTITIES DocBook Trademark Entities//IT">
+%it-trademarks;
+
+<!ENTITY % trademarks PUBLIC "-//FreeBSD//ENTITIES DocBook Trademark Entities//EN">
+%trademarks;
+
+<!ENTITY % translators PUBLIC "-//FreeBSD//ENTITIES DocBook Translator Entities//IT">
+%translators;
+
+<!ENTITY % chapters SYSTEM "chapters.ent"> %chapters;
+<!ENTITY % not.published "INCLUDE">
+
+<!ENTITY % chap.bsd "IGNORE">
+<!ENTITY % chap.freebsd "IGNORE">
+<!ENTITY % chap.ports "IGNORE">
+<!ENTITY % chap.kernel "IGNORE">
+<!ENTITY % chap.update "IGNORE">
+<!ENTITY % chap.activities "IGNORE">
+<!ENTITY % chap.apache2 "IGNORE">
+]>
+
+<book lang="it">
+  <bookinfo>
+    <title>Note su FreeBSD</title>
+
+    <author>
+      <firstname>Stefano</firstname>
+
+      <surname>Tagliaferri</surname>
+
+      <affiliation>
+        <address><email>stefano@merlinobbs.net</email></address>
+      </affiliation>
+    </author>
+
+    <pubdate>Dicembre 2003</pubdate>
+
+    <copyright>
+      <year>2003</year>
+
+      <year>2004</year>
+
+      <holder>The FreeBSD Italian Documentation Project</holder>
+    </copyright>
+
+    &bookinfo.legalnotice;
+
+    <legalnotice id="trademarks" role="trademarks">
+      &tm-attrib.freebsd;
+      &tm-attrib.3com;
+      &tm-attrib.3ware;
+      &tm-attrib.arm;
+      &tm-attrib.adaptec;
+      &tm-attrib.adobe;
+      &tm-attrib.apple;
+      &tm-attrib.corel;
+      &tm-attrib.creative;
+      &tm-attrib.cvsup;
+      &tm-attrib.heidelberger;
+      &tm-attrib.ibm;
+      &tm-attrib.ieee;
+      &tm-attrib.intel;
+      &tm-attrib.intuit;
+      &tm-attrib.linux;
+      &tm-attrib.lsilogic;
+      &tm-attrib.m-systems;
+      &tm-attrib.macromedia;
+      &tm-attrib.microsoft;
+      &tm-attrib.netscape;
+      &tm-attrib.nexthop;
+      &tm-attrib.opengroup;
+      &tm-attrib.oracle;
+      &tm-attrib.powerquest;
+      &tm-attrib.realnetworks;
+      &tm-attrib.redhat;
+      &tm-attrib.sap;
+      &tm-attrib.sun;
+      &tm-attrib.symantec;
+      &tm-attrib.themathworks;
+      &tm-attrib.thomson;
+      &tm-attrib.usrobotics;
+      &tm-attrib.vmware;
+      &tm-attrib.waterloomaple;
+      &tm-attrib.wolframresearch;
+      &tm-attrib.xfree86;
+      &tm-attrib.xiph;
+      &tm-attrib.general;
+    </legalnotice>
+
+    <abstract>
+      <para>Note su FreeBSD: una guida ridotta - Indicazioni per installare,
+        configurare, hardenizzare e rendere sicuro ed operativo un server
+        FreeBSD.</para>
+    </abstract>
+  </bookinfo>
+
+  &chap.preface;
+  &chap.bsd;
+  &chap.freebsd;
+  &chap.ports;
+  &chap.kernel;
+  &chap.update;
+  &chap.activities;
+  &chap.apache2;
+</book>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     End:
+-->

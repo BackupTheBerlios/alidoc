@@ -1,0 +1,272 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<preface id="preface">
+  <title>Prefazione</title>
+
+  <bridgehead id="preface-notes" renderas="sect1">Note sugli
+    appunti</bridgehead>
+
+  <para>Questi appunti vengono forniti con le stesse garanzie della maggioranza
+    dei software commerciali: non esiste alcuna garanzia, n&egrave; implicita,
+    n&egrave; esplicita relativamente all'adeguatezza per l'uso particolare o
+    per la eventuale commerciabilit&agrave;.  L'autore non si assume alcuna
+    responsabilit&agrave; per eventuali danni diretti o indiretti che queste
+    informazioni potrebbero arrecare al vostro sistema informatico.</para>
+
+  <para>L'utilizzo di questo documento &egrave; a Vostro rischio e pericolo
+    ;-).</para>
+
+  <para>Le versioni di FreeBSD utilizzate per realizzare questo documento sono
+    la 4.8-STABLE, 4.9-STABLE, la 5.0-CURRENT, 5.1-CURRENT e la 5.2-RC.</para>
+
+  <bridgehead id="preface-author" renderas="sect1">Note sull'autore</bridgehead>
+
+  <para>&a.it.stefano; &egrave; Network &amp; Security manager, System
+    Engineer e <ulink url="http://www.redhat.com/">Red Hat</ulink> Certified
+    Engineer, le principali specializzazioni sono la progettazione di
+    infrastrutture informatiche, tecnologiche, dei sistemi informativi e delle
+    reti perimetrali.  Le conoscenze sistemistiche vanno dagli apparati di rete
+    della Cisco Systems (routers, firewall ecc..) alle piattaforme &unix; (Linux
+    e *BSD) nonch&egrave; sistemi &microsoft.windows; (Active Directory) ed
+    &os2;.</para>
+
+  <bridgehead id="preface-references" renderas="sect1">Riferimenti</bridgehead>
+
+  <para>Oltre al lavoro svolto personalmente, l'occasione &egrave; gradita per
+    citare molti dei riferimenti che hanno consentito la stesura di alcune
+    parti di questo documento.</para>
+
+  <para>I casi di studio riportati in questo tomo sono stati simulati con
+    FreeBSD 5.0-RELEASE, 5.1-RELEASE, 5.2-RC1 (new technology) e principalmente
+    con la versione 4.8-STABLE, 4.9-STABLE.</para>
+
+  <para>Server di produzione installati con FreeBSD 4.9-STABLE:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>HP Netserver Lp 2000r</para>
+    </listitem>
+
+    <listitem>
+      <para>Fujitsu-Siemens Primergy L200 / PIII 1,3Ghz - 1Gb di RAM</para>
+    </listitem>
+
+    <listitem>
+      <para>Compaq Proliant PII 450Mhz - 128 Mb di RAM</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>Macchine utilizzate per i test:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>Pentium IV-2Ghz su scheda Asus P4PE con 1Gb di RAM</para>
+    </listitem>
+
+    <listitem>
+      <para>AMD Athlon XP+ 2400 su scheda ECS-K7S5A Pro con 256 Mb di RAM</para>
+    </listitem>
+
+    <listitem>
+      <para>AMD Athlon 500Mhz su scheda Asus K7M con 256 Mb di RAM</para>
+    </listitem>
+
+    <listitem>
+      <para>ADM K6/3D 300Mhz su scheda QDI-P5I430TX con 96 Mb di RAM</para>
+    </listitem>
+
+    <listitem>
+      <para>ADM K6 233Mhz su scheda TX-Pro con 64 Mb di RAM</para>
+    </listitem>
+
+    <listitem>
+      <para>LapTop HP Xe3 con Pentium III 1Ghz e 512Mb di RAM</para>
+    </listitem>
+  </itemizedlist>
+
+  <para>URL:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>URL del progetto FreeBSD: <ulink
+          url="http://www.FreeBSD.org">http://www.FreeBSD.org</ulink></para>
+    </listitem>
+
+    <listitem>
+      <para>URL del progetto GUFI - Gruppo Utenti FreeBSD Italia: <ulink
+          url="http://www.gufi.org/">http://www.gufi.org/</ulink></para>
+    </listitem>
+
+    <listitem>
+      <para>
+        URL di FreeBSD HandBook: <ulink
+          url="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/">http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL del manuale in lingua Italiana di FreeBSD: <ulink
+          url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL del progetto BSD-FAQ-it: <ulink
+        url="http://www.gufi.org/~rionda/docs/">http://www.gufi.org/~rionda/docs/</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL del libro <quote>Introduzione a UNIX</quote>, &copy; 1996, 1997, 1998
+        University Technology Services, The Ohio State University, traduzione a
+        cura di &a.it.mark;: <ulink
+          url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/unix-introduction/index.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/unix-introduction/index.html</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL dell'articolo <quote>Costruire un firewall con FreeBSD e
+          IPFIREWALL - Le regole</quote> di Stefano Riva: <ulink
+          url="http://www.gufi.org/testi.php3?key=vari:ipfwregole">http://www.gufi.org/testi.php3?key=vari:ipfwregole</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL BSDVault portal (for the users by the users): <ulink
+          url="http://bsdvault.net/">http://bsdvault.net/</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL The FreeBSD How-To portal: <ulink
+          url="http://www.freebsdhowtos.com/">http://www.freebsdhowtos.com/</ulink>
+      </para>
+    </listitem>
+
+    <listitem>
+      <para>URL www.FREEBDI.org portal: <ulink
+          url="http://www.freebdi.org/">http://www.freebdi.org/</ulink>
+      </para>
+    </listitem>
+  </itemizedlist>
+
+  <para>Risorse, libri e pubblicazioni:</para>
+
+  <itemizedlist>
+    <listitem>
+      <para>FreeBSD in 24 hours (M.Urban, Brian Tiemman)</para>
+    </listitem>
+
+    <listitem>
+      <para>Essential System Administration (O'Realy - Aeleen Frish)</para>
+    </listitem>
+
+    <listitem>
+      <para>Speciale FreeBSD 5.0 (Quaderni di informatica di Linux&amp;C -
+        Paolo Pisati)
+      </para>
+    </listitem>
+  </itemizedlist>
+
+  <bridgehead id="preface-conv" renderas="sect1">Convenzioni usate in questo
+    libro</bridgehead>
+
+    <para>Per fornire un testo consistente e facile da leggere, sono state
+      seguite numerose convenzioni in tutto il libro.</para>
+
+  <bridgehead id="preface-conv-typographic" renderas=sect2>Convenzioni
+    Tipografiche</bridgehead>
+
+  <variablelist>
+    <varlistentry>
+      <term><emphasis>Italico</emphasis></term>
+
+      <listitem>
+        <para>Un font <emphasis>italico</emphasis> &egrave; per i nomi dei
+          file, per gli URL, per il testo enfatizzato, e per il primo utilizzo
+          dei termini tecnici.</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><varname>Monospazio</varname></term>
+
+      <listitem>
+        <para>Un font <varname>monospazio</varname> &egrave; usato per i
+          messaggi di errore, i comandi, le variabili di ambiente, i nomi dei
+          port, i nomi di host, i nomi degli utenti, i nomi dei gruppi, i nomi
+          dei device, le variabili, e i frammenti di codice.</para>
+      </listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><application>Grassetto</application></term>
+
+      <listitem>
+        <para>Un font in <application>grassetto</application> &egrave; per le
+          applicazioni, i comandi, e i tasti.</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+
+  <bridgehead id="preface-conv-commands" renderas="sect2">Input
+    dell'Utente</bridgehead>
+
+  <para>I tasti sono visualizzati in <keycap>grassetto</keycap> per
+    differenziarli dal testo normale.  Le combinazioni di tasti che devono
+    essere digitate contemporaneamente sono visualizzate con un
+    `<literal>+</literal>' tra i tasti, come:</para>
+
+  <para><keycombo action="simul">
+      <keycap>Ctrl</keycap>
+      <keycap>Alt</keycap>
+      <keycap>Del</keycap>
+    </keycombo></para>
+
+  <para>Significa che l'utente deve premete i tasti <keycap>Ctrl</keycap>,
+    <keycap>Alt</keycap>, e <keycap>Del</keycap> nello stesso momento.</para>
+
+  <para>I tasti che devono essere digitati in sequenza saranno separati da
+    virgole, come per esempio:</para>
+
+  <para><keycombo action="simul">
+      <keycap>Ctrl</keycap>
+      <keycap>X</keycap>
+    </keycombo>, <keycombo action="simul">
+      <keycap>Ctrl</keycap>
+      <keycap>S</keycap>
+    </keycombo></para>
+
+  <para>Vuol dire che l'utente deve digitare i tasti <keycap>Ctrl</keycap> e
+    <keycap>X</keycap> contemporaneamente e poi i tasti <keycap>Ctrl</keycap> e
+    <keycap>S</keycap>.</para>
+
+  <bridgehead id="preface-conv-examples" renderas="sect2">Esempi</bridgehead>
+
+  <para>Gli esempi che iniziano con &prompt.root; indicano un comando che deve
+    essere invocato dal superuser in FreeBSD.  Puoi effettuare il login come
+    <username>root</username> per digitare il comando, o loggarti con il tuo
+    normale account e usare &man.su.1; per acquisire i privilegi da
+    superuser.</para>
+
+  <screen>&prompt.root; <userinput>dd if=kern.flp of=/dev/fd0</userinput></screen>
+
+  <para>Gli esempi che iniziano con &prompt.user; indicano un comando che deve
+    essere eseguito da un normale utente.  Dove non indicato, &egrave; usata
+    la sintassi C-shell per impostare variabili di ambiente e altri comandi di
+    shell.</para>
+
+  <screen>&prompt.user; <userinput>top</userinput></screen>
+</preface>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "preface")
+     End:
+-->

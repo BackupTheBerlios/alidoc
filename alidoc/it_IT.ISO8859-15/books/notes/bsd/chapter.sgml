@@ -1,0 +1,375 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="bsd">
+  <title>Note su BSD</title>
+
+  <sect1 id="bsd-intro">
+    <title>Che cosa &egrave; BSD</title>
+
+    <para>&unix; nasce nel 1969 nei laboratori Bell della AT&amp;T e nel 1976
+      venne messo gratuitamente a disposizione delle Universit&agrave;.  Alla
+      fine degli anni '70 AT&amp;T inizier&agrave; la trasformazione di &unix;
+      in un Sistema Operativo commerciale: da questo momento le versioni
+      commerciali dello &unix; presero il nome di System III e System V.  Lo
+      &unix; realizzato dalla Universit&agrave; di Berkeley vide la luce nel
+      lontano 1977 e le versioni rilasciate divennero di importanza stategica
+      soltanto nel 1993 con il rilascio di 4.4BSD.  Successivamente Berkeley
+      rimosse completamente il codice di AT&amp;T dal suo Sistema BSD giungendo
+      al rilascio di 4.4BSD-lite, l'ultimo Sistema Operativo BSD realizzato
+      dall'Universit&agrave; di Berkeley f&ugrave 386/BSD.  Oltre ad essere un
+      Sistema Operativo, BSD &egrave; fondamentalmente una licenza software.
+      Questo tipo di licenza impone di preservare nelle note di copyright il
+        <emphasis>disclaimer liability</emphasis>.</para>
+
+    <para>Possiamo anche dire che la licenza BSD &egrave; una licenza molto
+      aperta se paragonata con la licenza GNU alla quale &egrave; sottoposto
+      Linux, il pi&ugrave; conosciuto dei sistemi operativi a codice
+      libero.</para>
+
+    <para>Il <emphasis>disclaimer liability</emphasis> <quote>Regents of the
+        University of California</quote> pu&ograve; essere riscontrato in
+      qualsiasi versione &unix;, in Linux, in tutte le versioni di &windows; e
+      per finire anche l'IBM OS/2 contiene molte parti di codice BSD.</para>
+
+    <para>Nel pieno rispetto del <emphasis>disclaimer liability</emphasis>,
+      tutto Il software rilasciato sotto la licenza BSD pu&ograve; essere dunque
+      facilmente modificato e utilizzato, sia nella realizzazione del software
+      libero che nella realizzazione del software commerciale e/o
+      proprietario.</para>
+
+    <para>I sistemi operativi rilasciati sotto la licenza BSD e derivati dal
+      codice di 4.4BSD includono NetBSD, BSD/OS (unsupported), FreeBSD, OpenBSD,
+      Darwin OS e Mac OS X, in particolare sono tre i sistemi operativi a codice
+      libero maggiormente conosciuti ed utilizzati:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>OpenBSD</emphasis> che nasce per garantire un maggior
+          livello di sicurezza, se avete necessit&agrave; di disporre di un
+          server altamente sicuro &egrave; questo il sistema giusto.
+          OpenBSD include tutti gli strumenti di sicurezza disponibili oggi sul
+          mercato e la crittografia &egrave; parte integrale del sistema.  Il
+          team di OpenBSD ha contribuito a scoprire e a correggere molte
+          vulnerabilit&agrave; dei sistemi &unix; compresi i problemi dei
+          programmi sviluppati da terze parti, il team di OpenBSD sviluppa anche
+          OpenSSH.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>NetBSD</emphasis> che nasce per garantire il
+          massimo livello di portabilit&agrave;, &egrave; la prova della
+          filosofia originale dello &unix;: <quote>il tipo di processore non
+            &egrave; importante</quote>.  NetBSD &egrave; in grado di girare su
+          pi&ugrave; di 50 processori differenti, pu&ograve; infatti anche
+          girare anche su macchine <quote>esotiche</quote>; come la Playstation
+          o il Dreamcast, probabilmente NetBSD &egrave; il pi&ugrave;
+          impressionante progetto Free Software di sempre.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>FreeBSD</emphasis> che nasce per garantire
+          stabilit&agrave; ed usabilit&agrave;, si tratta di un sistema semplice
+          e pulito, facile da installare e configurare.  La rete e la sicurezza
+          sono uno dei punti di forza di FreeBSD, gli standard
+          IPv6 ed IPSec consentono di gestire con semplicit&agrave; una VPN
+          (Virtual Private Network).  La documentazione a disposizione degli
+          utenti &egrave; molto ben organizzata e pu&ograve; rappresentare un
+          vero aiuto anche per i principianti.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Nel mese di Agosto del 2003, anche la Apple, proprietaria di Darwin OS
+      e Mac OS X, ha rilasciato il cuore dei propri Sistemi Operativi sotto la
+      licenza APSL 2.0 (<ulink
+        url="http://www.opensource.apple.com/apsl/2.0.txt">http://www.opensource.apple.com/apsl/2.0.txt</ulink>).
+      Questo tipo di licenza, che ha anche ricevuto l'approvazione della FSF
+      (Free Software Foundation), trasforma Darwin OS e Mac OS X in Sistemi
+      Operativi a codice libero (Free Software).</para>
+
+    <para>Naturalmente le versioni BSD pi&ugrave; famose rilasciate con la
+      formula del codice libero sono <emphasis>stabili</emphasis>,
+      <emphasis>sicure</emphasis> ed <emphasis>usabili</emphasis>,
+      in particolare, secondo il parere di chi scrive, la migliore delle
+      piattaforme BSD per l'architettura IA32 (x86) &egrave; certamente
+      FreeBSD.</para>
+
+    <para>Alla fine degli anni '70 la licenza BSD era anche conosciuta come la
+      <emphasis>Berkeley Software Distribution(s)</emphasis> che successivamente
+      &egrave; stata rimpiazzata dalla <emphasis>BSD-licensed
+        code</emphasis>.</para>
+
+    <para>Il TCP/IP (Internet Protocols) ed altre tecnologie avanzate come
+      l'IPv6 (Internet Protocols Version 6) ed IpSec (IpSecurity) sono state
+      originariamente sviluppate ed introdotte per la prima volta nei sistemi
+      BSD.</para>
+
+    <para>Come abbiamo gi&agrave; accennato, i sistemi operativi BSD possono
+      girare su piattaforme disparate, le pi&ugrave; famose di queste
+      sono:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Alpha</para>
+      </listitem>
+
+      <listitem>
+        <para>PowerPC</para>
+      </listitem>
+
+      <listitem>
+        <para>Amiga</para>
+      </listitem>
+
+      <listitem>
+        <para>HP 9000</para>
+      </listitem>
+
+      <listitem>
+        <para>Sparc</para>
+      </listitem>
+
+      <listitem>
+        <para>VAX</para>
+      </listitem>
+
+      <listitem>
+        <para>Sega Dreamcast</para>
+      </listitem>
+
+      <listitem>
+        <para>IA32 (x86)</para>
+      </listitem>
+
+      <listitem>
+        <para>IA64 (x86)</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Una completa panoramica sui sistemi BSD e sulla storia della licenza
+      BSD &egrave; disponibile all'URL <ulink
+        url="http://www.freebsd.org/doc/it_IT.ISO8859-15/articles/explaining-bsd/index.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/articles/explaining-bsd/index.html</ulink>,
+      un altro interessante riferimento &egrave; <quote>&unix Free: i
+        BSD</quote> di Georges Tarbouriech all'URL <ulink
+        url="http://tldp.org/linuxfocus/Italiano/January2003/article276.shtml">http://tldp.org/linuxfocus/Italiano/January2003/article276.shtml</ulink>.
+    </para>
+  </sect1>
+
+  <sect1 id="bsd-free">
+    <title>Cosa &egrave; FreeBSD</title>
+
+    <para>FreeBSD &egrave; un sistema operativo di altissima qualit&agrave; che
+      &egrave; compatibile con gli stantard &unix;.  FreeBSD fu basato
+      originariamente sul codice di 4.4BSD-lite e viene sviluppato
+      principalmente dalla Universit&agrave; della California Berkeley
+      nonch&egrave; da altri collaboratori.</para>
+
+    <para>Con circa 17 anni di sviluppo, FreeBSD &egrave; uno dei sistemi
+      pi&ugrave; maturi nell'ambito dei <emphasis>Networking Operating
+        System</emphasis>, il suo kernel, i driver e le sue modalit&agrave; di
+      sviluppo, rappresentano una vera e propria garanzia per quello che
+      concerne la stabilit&agrave; e la sicurezza.</para>
+
+    <para>FreeBSD supporta SMP (Simmetric Multi Processing) ed implementa
+      nativamente uno dei migliori sistemi di firewalling oggi sul mercato,
+      include il NAT (Network Address Translation) ed il Traffic Shaping,
+      FreeBSD &egrave; anche famoso per la sicurezza nella trasmissione dei
+      dati (ottima l'implementazione di IPv6 e IPSec) e per le sue performance
+      in ambito web server.</para>
+
+    <para>FreeBSD viene generalmente utilizzato dagli Internet Service Provider,
+      ma viene anche usato in altri tipi di attivit&agrave; commerciali per le
+      sue performance elevatissime nell'ambito del networking.</para>
+
+    <para>FreeBSD viene fornito con XFree86 che oggi &egrave; lo standard
+      industriale per quello che concerne l'<emphasis>X Windows system
+        (X11R6)</emphasis>, FreeBSD include diverse applicazioni tra le quali
+      citiamo Gnome, KDE, Netscape e Mozilla, il sistema viene fornito con il
+      relativo codice sorgente.</para>
+
+    <para>FreeBSD pu&ograve; essere prelevato dal sito internet <ulink
+        url="http://www.freebsd.org/">http://www.freebsd.org/</ulink>, il set
+      completo dei CD, libri, gadget e magliette possono essere acquistati da
+      <ulink url="http://www.freebsdmall.com/">The FreeBSD Mall</ulink>.</para>
+
+    <para>Maggiori dettagli ed informazioni su FreeBSD sono contenute, in modo
+      molto dettagliato, nel FreeBSD Handbook, di seguito forniamo alcuni
+      riferimenti di base:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Benvenuto in FreeBSD all'URL <ulink
+            url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/nutshell.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/nutshell.html</ulink>
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>La storia di FreeBSD all'URL <ulink
+            url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/history.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/history.html</ulink>
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>La licenza di utilizzo di FreeBSD all'URL <ulink
+            url="http://www.freebsd.org/copyright/freebsd-license.html">http://www.freebsd.org/copyright/freebsd-license.html</ulink>
+        </para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+
+  <sect1 id="bsd-this-contribution">
+    <title>Questo contributo</title>
+
+    <para><emphasis>La perplessit&agrave; pi&ugrave; grande, riguarda
+      per&ograve; il fatto che l'integrazione all'interfaccia grafica del
+      sistema operativo, per quanto comodissima, &egrave; del tutto trasparente
+      e conduce l'utilizzatore ad un uso puramente meccanico di ....</emphasis>
+      <footnote>
+        <para>tratto da <quote>Kriptonite</quote> di Joe Lametta: Fuga dal
+          controllo globale.  Crittografia, anonimato e privacy nelle reti
+          telematiche.</para>
+      </footnote>
+    </para>
+
+    <para>La passione e la professione, molto spesso ci portano a dover
+      effettuare delle scelte, anche molto importanti, come quella di dover
+      selezionare il Sistema Operativo adeguato per le nostre esigenze o a
+      quelle che sono le migliori specifiche per gestire le informazioni della
+      nostra azienda.</para>
+
+    <para>Nella mia esperienza ho sempre ritenuto Linux un'ottima scelta sia
+      per la gestione dei sistemi di <emphasis>internet front-end</emphasis>
+      che una soluzione di livello assoluto per la gestione dei sistemi di
+      controllo e di networking avanzato.  Negli ultimi tempi, alcuni dei
+      maggiori distributori di sistemi Linux, hanno purtroppo deciso di
+      modificare la formula di supporto e di distribuzione del sistema
+      operativo: Linux attualmente &egrave; di fatto alla stregua di tutti gli
+      altri Sistemi Operativi commerciali.  Questo tipo di politica, i continui
+      giochi di potere ed il fastidioso business sul termine Linux, hanno
+      svilito la sua natura di sistema operativo a codice libero.  Queste
+      motivazioni e tutto l'inutile rumore sollevato dalla questione SCO/IBM,
+      relativamente alle presunte e non dimostrate righe di codice &unix;
+      inserite da IBM nel kernel Linux, mi hanno obbligato a valutare delle
+      soluzioni alternative nella gestione dei sistemi e delle
+      infrastrutture.</para>
+
+    <para>Nel passato ho sempre avuto dei riscontri molto positivi a riguardo
+      dei sistemi BSD, non dimentichiamo che da queste piattaforme trae origine
+      moltissimo del codice &unix;, &egrave; dai sistemi BSD che sono state
+      copiate molte parti di codice inserite in qualsiasi altro Sistema
+      Operativo.  Cos&igrave; &egrave; iniziata l'esplorazione di FreeBSD,
+      che dei tre sistemi BSD a codice libero &egrave; probabilmente il
+      pi&ugrave; semplice da installare.  Il programma di installazione &egrave;
+      molto simile alle caratteristiche di una delle distribuzioni storiche di
+      Linux, la Slackware, per finire le conoscenze disponibili all'interno
+      dell'infrastruttura hanno delineato la soluzione FreeBSD come una delle
+      risposte maggiormente adeguate al contesto e alle esigenze.</para>
+
+    <para>Lavorando sul sistema, analizzandone la struttura e le
+      potenzialit&agrave;, ho potuto immediatamente apprezzare le sue doti a
+      riguardo della scalabilit&agrave;, della potenza di calcolo e della
+      semplicit&agrave;, sia per quello che concerne la struttura del
+      filesystem che per la gestione degli aggiornamenti di sistema e delle
+      applicazioni fornite da terze parti.</para>
+
+    <para>Avevo bisogno di un sistema agile che mi offrisse la
+      possibilit&agrave; di installare il minimo indispensabile per essere
+      immediatamente operativi, il necessario per riservarsi in qualsiasi
+      momento il massimo livello di scelta nella gestione delle applicazioni.
+      La struttura di FreeBSD ha pochi fronzoli ed include tutti gli strumenti
+      base che sono totalmente integrati nel Sistema Operativo, tra questi
+      spiccano le componenti per gestire la sicurezza e la crittografia
+      (<ulink url="http://www.openssl.org/">OpenSSL</ulink> ed <ulink
+        url="http://www.openssh.org/">OpenSSH</ulink>), il sistema di gestione
+      della posta elettronica (<ulink
+        url="http://www.sendmail.org/">Sendmail</ulink>) e, per finire, il
+      sistema di risoluzione dei nomi (<ulink
+        url="http://www.isc.org/products/BIND/">Bind</ulink>).  Tutti gli altri
+      pacchetti software sono opzionali e vengono inseriti nell'albero dei
+      port, a partire dall'X Windows System, che sui sistemi server non
+      fornisce alcun effettivo beneficio.</para>
+
+    <para>Le modalit&agrave; di aggiornamento di FreeBSD e la massima
+      configurabilit&agrave; del kernel, ci offrono l'opportunit&agrave; di
+      disegnare delle soluzioni che si integrano ai massimi livelli con
+      l'hardware a nostra disposizione e le nostre esigenze di tutti i giorni,
+      a questi vantaggi possiamo tranquillamente aggiungere le ventennale
+      esperienza nello sviluppo dei sistemi BSD e le performance offerte da un
+      sistema &unix;-like.</para>
+
+    <para>Linux, nonostante il polverone alzato dalla SCO, nonostante la
+      politica di pricing adottata da alcuni dei suoi distributori pi&ugrave;
+      famosi nonch&egrave; la continua aggiunte di inutili applicazioni che lo
+      rendono difficile da aggiornare ed amministrare, rimane sempre e comunque
+      una scelta valida, una soluzione probabilmente insostituibile per i
+      sistemi multiprocessore.  FreeBSD oggi &egrave; una eccellente
+      alternativa, una soluzione senza inutili fronzoli che, oltre ad offrire
+      il necessario per una corretta amministrazione del sistema, se coniugato
+      con la potenza di calcolo oggi disponibile, fornisce quelle
+      funzionalit&agrave;, le performance e la scalabilit&agrave; che sono oggi
+      necessarie alla gestione di un Datacenter.</para>
+
+    <para>Questo contributo &egrave; stato dunque concepito per tenere memoria,
+      avere a disposizione una valida agenda <quote>operativa</quote> che
+      supporti l'utente di FreeBSD nelle eventuali successive installazioni del
+      sistema operativo.  La comprensione di questo tomo presume che il
+      lettore sia gi&agrave; preparato su diversi argomenti in materia di
+      <emphasis>ingegneria dei sistemi</emphasis>.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Conoscenza approfondita dei sistemi &unix;, la conoscenza di un
+          sistema &unix;-like come Linux &egrave; sufficente (<ulink
+            url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/unix-introduction/structure.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/unix-introduction/structure.html</ulink>)
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>Comprensione e funzionamento dell'albero delle directory di un
+          sistema &unix; (<ulink
+            url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/unix-introduction/structure-file-system.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/unix-introduction/structure-file-system.html</ulink>)
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>Conoscenza relativa al funzionamento della procedura di boot di
+          una macchina &unix;, se proprio ci si vuole addentrare
+          nell'installazione di questo splendido sistema &egrave; necessario
+          disporre delle nozioni sui sistemi di boot di uno dei diversi sistemi
+          operativi presenti sul mercato.</para>
+      </listitem>
+
+      <listitem>
+        <para>Capacit&agrave; e praticit&agrave; nel partizionamento di un
+          disco, conoscenze delle differenze tra le partizioni primarie e le
+          partizioni logiche.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Il presente contributo si pone anche l'ambizioso obiettivo di fornire
+      al lettore alcune informazioni relative alla gestione di un sistema in
+      ambienti <emphasis>mission critical</emphasis>.  All'interno di questo
+      documento verranno dunque citate diverse soluzioni che l'autore ritiene
+      fondamentali per installare e configurare un sistema FreeBSD in
+      un'ambiente di rete avanzato come quello di un data center o come quello
+      internet based.  In questo tomo non verr&agrave; volutamente trattata la
+      gestione e la configurazione dell'X-Window System, per avere maggiori
+      informazioni a riguardo si faccia riferimento diretto alle <ulink
+        url="http://www.gufi.org/~rionda/docs/c921.html">BSD-FAQ-it</ulink> (in
+      lingua italiana) oppure al <ulink
+        url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/x11.html">manuale</ulink>
+      di FreeBSD.
+    </para>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

@@ -1,0 +1,19 @@
+<!--
+     The FreeBSD Italian Documentation Project
+
+     Crea le entities per ogni capitolo di Note su FreeBSD.
+     Ogni entity &egrave; chiamata chap.foo, dove foo &egrave; il valore
+     dell'attributo id di quel  capitolo, e corrisponde al nome della directory
+     nella quale il file sgml del capitolo &egrave; salvato.
+
+     I capitoli devono essere listati nell'ordine in cui sono referenziati.
+-->
+
+<!ENTITY chap.preface                 SYSTEM "preface/preface.sgml">
+<!ENTITY chap.bsd                     SYSTEM "bsd/chapter.sgml">
+<!ENTITY chap.freebsd                 SYSTEM "freebsd/chapter.sgml">
+<!ENTITY chap.ports                   SYSTEM "ports/chapter.sgml">
+<!ENTITY chap.kernel                  SYSTEM "kernel/chapter.sgml">
+<!ENTITY chap.update                  SYSTEM "update/chapter.sgml">
+<!ENTITY chap.activities              SYSTEM "activities/chapter.sgml">
+<!ENTITY chap.apache2                 SYSTEM "apache2/chapter.sgml">

@@ -1,0 +1,189 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="update">
+  <title>Aggiornare il sistema (il <quote>world</quote> di &os;)</title>
+
+  <sect1 id="update-preface">
+    <title>Preambolo</title>
+
+    <para>Abbiamo gi&agrave; visto come aggiornare i sorgenti del sistema
+      utilizzando il programma <application>CVSup</application>, abbiamo
+      anche gi&agrave; aggiornato il file <filename>/etc/make.conf</filename>
+      al fine di rendere possibile la sincronizzazione dei sorgenti del sistema,
+      ora disponiamo di due possibilit&agrave; operative per aggiornare
+      l'albero dei ports, l'albero dei sorgenti e la documentazione.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Possiamo creare degli script di shell da inserire nelle procedure
+          periodiche del sistema;</para>
+      </listitem>
+
+      <listitem>
+        <para>Possiamo utilizzare un file <filename>/etc/make.conf</filename>
+          opportunamente configurato per aggiornare manualmente il sistema
+          grazie ai vari comandi di <application>Make</application>.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Ora configuriamo il sistema di compilazione dei sorgenti in modo che
+      tutti i binari che verranno generati dal processo di compilazione siano
+      ottimizzati per la nostra architettura e facciano riferimento alle
+      specifiche da noi desiderate.  Aggiorniamo il file
+      <filename>/etc/make.conf</filename> con le seguenti righe:</para>
+
+    <programlisting># Currently the following CPU types are recognized:
+# Intel x86 architecture:
+# (AMD CPUs) k7 k6-2 k6 k5
+# (Intel CPUs) p4 p3 p2 i686 i586/mmx i586 i486 i386
+# Alpha/AXP architecture: ev6 pca56 ev56 ev5 ev45 ev4
+#CPUTYPE=i686
+CFLAGS= -O -pipe
+NOPROFILE= true
+#</programlisting>
+
+    <para>Per i riferimenti ufficiali per aggiornare &os; allo stato dell'arte
+      consultare il <ulink
+        url="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/cutting-edge.html">Manuale di FreeBSD</ulink>.</para>
+  </sect1>
+
+  <sect1 id="update-buildworld">
+    <title>Nuovo kernel e nuovo sistema</title>
+
+    <para>Dopo aver analizzato dettagliatamente le singole operazioni
+      necessarie all'aggiornamento del kernel e aver preso una certa confidenza
+      con il sistema e le procedure da svolgere per preparare la macchina
+      all'esecuzione di una versione stabile del sistema operativo,
+      riepiloghiamo velocemente la modalit&agrave; operativa da seguire nel
+      caso si decida di aggiornare &os; alla versione
+      <emphasis>STABLE</emphasis>.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Subito dopo aver installato un nuovo sistema operativo si
+          prepareranno gli script da utilizzare con l'applicazione
+          <application>CVSup</application> che consentir&agrave; la
+          sincronizzazione dei sorgenti, dei ports e della documentazione di
+          &os;;</para>
+      </listitem>
+
+      <listitem>
+        <para>Si provveda alla preparazione del file di
+          <application>Make</application> <filename>/etc/make.conf</filename>
+          nel quale verr&agrave; specificata l'architettura del sistema e il
+          sistema di aggiornamento tramite
+          <application>CVSup</application>;</para>
+      </listitem>
+
+      <listitem>
+        <para>Si provveda alla preparazione di un file di configurazione
+          ottimizzato per il nostro kernel
+          <filename>/usr/src/sys/i386/conf/MYKERNEL</filename>;</para>
+      </listitem>
+
+      <listitem>
+        <para>Si provveda alla preparazione dei file e degli script da
+          utilizzare con il &man.crontab.1;, questo &egrave; l'unico sistema
+          che consente di avere un albero dei port con la documentazione del
+          sistema sempre ottimizzati ed aggionati.  Per comodit&agrave;,
+          in basso, troverete un file di esempio che, utilizzato come
+          procedura periodica; consente di aggiornare i port e la
+          documentazione.</para>
+      </listitem>
+    </orderedlist>
+
+    <programlisting>#! /usr/local/bin/bash
+# nome del file: /etc/periodic/weekly/510.cvsup.sh
+#
+# scarica i ports e la documentazione
+/usr/local/bin/cvsup -g -L 2 /usr/local/etc/cvsup/ports-supfile
+/usr/local/bin/cvsup -g -L 2 /usr/local/etc/cvsup/doc-supfile
+#
+# sistema il database dei ports
+/usr/local/sbin/portsdb -uU
+# EOF</programlisting>
+
+    <para>Ora siamo pronti alla stabilizzazione e all'hardenizzazione del
+      sistema, posizioniamoci nella directory <filename>/usr/src</filename> ed
+      iniziamo l'aggiornamento dei sorgenti via
+      <application>CVSup</application>, successivamente procederemo alla
+      compilazione dei sorgenti che compongono il sistema operativo.  Il comando
+      <command>make buildworld</command> chiama il compilatore C e tutti gli
+      altri programmi necessari ad eseguire il <emphasis>rebuild</emphasis>
+      dell'intero sistema operativo (per questo motivo la procedura prende il
+      nome di <emphasis>world</emphasis>):</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/src && make update && make buildworld && make buildkernel KERNCONF=MYKERNEL && make installkernel KERNCONF=MYKERNEL</userinput></screen>
+
+    <para>Il processo di ricompilazione dell'intero sistema &egrave; stato
+      avviato su una macchina con un processore Pentium II a 350 Mhz, 64 Mb di
+      RAM.  In questo caso il processo di compilazione &egrave; iniziato alle
+      ore 11:02 ed &egrave; terminato alle ore 12:55.  Il processo di
+      compilazione dei sorgenti di &os;, eseguito su un sistema basato su
+      processore K6/3D 300Mhz, &egrave; durato circa 8 ore.</para>
+  </sect1>
+
+  <sect1 id="update-installworld">
+    <title>Mergemaster ed installazione del mondo</title>
+
+    <para>Dopo aver effettuato la <emphasis>build</emphasis> del sistema
+      operativo, compilato ed installato il nuovo kernel, possiamo avviare il
+      sistema in modalit&agrave; <emphasis>single user</emphasis> ed eseguire
+      la procedura denominata <emphasis>mergemaster</emphasis> con
+      l'installazione/aggiornamento di tutti i file principali di
+      configurazione del sistema.  Si tratta di una fase molto delicata che ci
+      divide dal successivo reboot della macchina e dall'esecuzione della nuova
+      configurazione.</para>
+
+    <para>&man.mergemaster.8; ci consentir&agrave;, all'evenienza, di fondere i
+      vecchi file di configurazione con i nuovi.  &Egrave; consigliabile
+      effettuare il backup dei file di configurazione principali.</para>
+
+    <screen>&prompt.root; <userinput>tar -cvf etc.old.tar /etc</userinput></screen>
+
+    <screen>&prompt.root; <userinput>shutdown now</userinput></screen>
+
+    <para>Se stiamo lavorando in remoto via <application>OpenSSH</application>
+      (Secure Shell), avremo ora la necessit&agrave; di accedere alla console
+      di sistema per poter procedere con il <emphasis>margemaster</emphasis> e
+      l'installazione dei nuovi file binari.  Al boot in modalit&agrave;
+      <emphasis>single user</emphasis> selezioniamo la shell di sistema
+      (<filename>/usr/local/bin/bash</filename> se la nosta shell &egrave;
+      bash)</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/src</userinput></screen>
+
+    <screen>&prompt.root; <userinput>mergemaster -p</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make installworld</userinput></screen>
+
+    <screen>&prompt.root; <userinput>mergemaster</userinput></screen>
+
+    <screen>&prompt.root; <userinput>reboot</userinput></screen>
+
+    <para>Sempre su un sistema Pentium II, 350 Mhz, la fase di installazione
+      del <emphasis>world</emphasis> &egrave; partita alle ore 13:15 ed &egrave;
+      terminata alle ore 13:26, tutti i file compilati vengono memorizzati
+      nella directory di sistema <filename>/usr/obj</filename>.</para>
+
+    <para>Se disponiamo di altri sistemi con la stessa configurazione hardware
+      &egrave; anche possibile utilizzare i file appena compilati anche su altre
+      macchine utilizzando o il NFS (Network File System) o altri sistemi di
+      sincronizzazione delle directory via rete come <ulink
+        url="http://samba.anu.edu.au/rsync/">Rsync</ulink>.  Al successivo
+      reboot potremo procedere con la cancellazione della directory
+      <filename>/usr/obj</filename>.</para>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

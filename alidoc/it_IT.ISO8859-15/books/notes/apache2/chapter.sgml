@@ -1,0 +1,370 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="apache2">
+  <title>Apache2</title>
+
+  <sect1 id="apache2-intro">
+    <title>Server Web Apache</title>
+
+    <para>Abbiamo gi&agrave; analizzato come utilizzare il sistema dei port per
+      disporre di una macchina sempre efficente, nel caso specifico vediamo come
+      procedere per installare il pi&ugrave; noto dei server web,
+      <application>Apache</application>.</para>
+
+    <para><emphasis>Apache2</emphasis> &egrave; stato principalmente studiato
+      per venire incontro alle esigenze dei sistemi Win32 dove, sino ad oggi,
+      <application>IIS</application> ha rappresentato lo standard.  Nella
+      realizzazione della versione 2 di <application>Apache</application>, gli
+      sviluppatori non hanno certo dimenticando la tradizionale piattaforma
+      compatibile con gli standard &unix; sulla quale il server web nasce,
+      cresce si sviluppa e trova l'indiscusso successo quale miglior server web
+      oggi disponibile sul mercato.</para>
+
+    <para>Da un punto di vista strutturale la grande novit&agrave; di
+      <application>Apache2</application> &egrave; la gestione dei
+      <emphasis>thread</emphasis>, in origine <application>Apache</application>
+      f&ugrave; progettato per suddividere tutte le richieste HTTP in processi:
+      maggiore &egrave; il numero delle richieste e maggiore sar&agrave; il
+      numero dei processi attivati dal demone <quote>padre</quote> che si
+      occupa di suddividere le risorse del server web.</para>
+
+    <para><application>Apache2</application> utilizza i moduli
+      <emphasis>MPM</emphasis> (Multi Processing Module) che consentono di
+      selezionare le risposte HTTP suddividendole in <emphasis>fork</emphasis>
+      o <emphasis>thread</emphasis>, i moduli <emphasis>MPM</emphasis> sono
+      diversi e sono stati concepiti per ottenere il massimo delle performance
+      dal sistema operativo che esegue <application>Apache2</application>.  Il
+      nuovo modello <emphasis>MPM</emphasis> rende
+      <application>Apache2</application> incompatibile con le versioni
+      precedenti, le modifiche apportate alle API di sistema sono
+      sostanziali.</para>
+
+    <para>Alla data odierna va sottolineato che il Multi Processing Module
+      threaded &egrave; piuttosto instabile ed &egrave; ancora una buona idea
+      far lavorare <application>Apache2</application> nella modalit&agrave;
+      tradizionale.  In effetti si possono creare o si possono riscontrare dei
+      problemi piuttosto seri a livello di compabilit&agrave; e di
+      funzionalit&agrave; con altri moduli come, ad esempio, il
+      <emphasis>mod_php4</emphasis>.  Probabilmente questo &egrave; uno dei
+      motivi principali per i quali ancora non &egrave; stata avviata una
+      migrazione massiccia da <application>Apache</application> ad
+      <application>Apache2</application>.</para>
+
+    <para>Il nuovo modulo proxy incluso in <application>Apache2</application>
+      consente di eseguire tecniche di reverse proxy anche su macchine IIS
+      opportunamente configurate, per finire, in
+      <application>Apache2</application> &egrave; stata anche implementata una
+      soluzione che consente di localizzare il contenuto.  Nella fase di
+      compilazione ed installazione, <application>Apache2</application> prevede
+      come default l'attivazione del modulo <emphasis>SSL</emphasis> (Secure
+      Socket Layer).</para>
+
+    <para>In questo capitolo analizzeremo come installare la nuova versione
+      2.0.48 di <application>Apache</application> su una macchina &os;,
+      prenderemo in considerazione una configurazione comune che si possa
+      adattare al meglio alle esigenze di tutti i giorni, compileremo ed
+      installeremo <application>Apache</application> attivando i moduli
+      <emphasis>mod_ssl</emphasis> e <emphasis>mod_php4</emphasis>.  Le librerie
+      per la crittografia <emphasis>open-ssl</emphasis> fanno parte dei
+      sorgenti di &os; e vengono compilate nella fase di build del sistema
+      operativo.</para>
+  </sect1>
+
+  <sect1 id="apache2-install">
+    <title>Installiamo Apache2</title>
+
+    <para>Senza trattare i particolari relativi all'ottimizzazione della
+      configurazione di <application>Apache</application>, in questo paragrafo
+      verr&agrave; illustrata la procedura di installazione che &egrave; comune
+      all'installazione di qualsiasi port.</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/www/apache2/</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make install</userinput></screen>
+
+    <para>Al termine dell'installazione facciamo pulizia con</para>
+
+    <screen>&prompt.root; <userinput>make clean</userinput></screen>
+
+    <para>I file di configurazione di <application>Apache2</application> vengono
+      installati nella directory
+      <filename>/usr/local/etc/apache2</filename>.</para>
+
+    <screen>&prompt.root; <userinput>ls -l /usr/local/etc/apache2/</userinput>
+total 164
+-rw-r--r-- 1 root wheel  1979 Apr 16 14:52 highperformance-std.conf
+-rw-r--r-- 1 root wheel  1979 Apr 16 14:52 highperformance.conf
+-rw-r--r-- 1 root wheel 37981 Apr 16 14:52 httpd-std.conf
+-rw-r--r-- 1 root wheel 37263 Apr 16 15:45 httpd.conf
+-rw-r--r-- 1 root wheel 12959 Apr 16 14:52 magic
+-rw-r--r-- 1 root wheel 12959 Apr 16 14:52 magic-dist
+-rw-r--r-- 1 root wheel 12368 Apr 16 14:52 mime.types
+-rw-r--r-- 1 root wheel 12368 Apr 16 14:52 mime.types-dist
+-rw-r--r-- 1 root wheel 11068 Apr 16 14:52 ssl-std.conf
+-rw-r--r-- 1 root wheel 11095 Apr 16 16:29 ssl.conf
+drwxr-xr-x 2 root wheel   512 Apr 16 14:01 ssl.crt
+drwxr-xr-x 2 root wheel   512 Apr 16 13:58 ssl.key</screen>
+
+    <para>Avviamo il server web utilizzando il comando <command>apachectl
+        start</command>.  Il file che consentir&agrave; di avviare
+      automaticamente <application>Apache2</application> come servizio locale
+      del sistema &egrave;
+      <filename>/usr/local/etc/rc.d/apache2.sh</filename>.</para>
+
+    <para>Il processo di installazione prevede anche la compilazione automatica
+      del modulo <emphasis>mod_ssl</emphasis>, per attivare questo modulo
+      sar&agrave; necessario creare una chiave privata che identifichi il
+      server, successivamente dovremo anche generare il relativo certificato
+      digitale autosegnato.</para>
+  </sect1>
+
+  <sect1 id="apache2-mod-ssl">
+    <title>Attiviamo il modulo mod_ssl</title>
+
+    <para>Il modulo <emphasis>mod_ssl</emphasis> fornisce un layer di
+      compatibilit&agrave; tra <application>Apache2</application> e le librerie
+      OpenSSL e pertanto consente di utilizzare protocolli come il <ulink
+        url="http://wp.netscape.com/eng/ssl3/">Secure Socket Layer</ulink> e il
+      Transport Layer Security.  Per attivare il modulo <emphasis>SSL</emphasis>
+      dovr&agrave; essere editato il file
+      <filename>/usr/local/etc/apache2/ssl.conf</filename> in modo da definire
+      sia il percorso dove verr&agrave; salvata la chiave privata che il
+      relativo certificato digitale autosegnato.</para>
+
+    <programlisting>SSLCertificateFile /usr/local/etc/apache2/ssl.crt/server.crt
+SSLCertificateKeyFile /usr/local/etc/apache2/ssl.key/server.key</programlisting>
+
+    <para>Generiamo la chiave privata utilizzando <emphasis>openssl</emphasis>
+      ed in particolare il <emphasis>3DES</emphasis> come sistema
+      crittografico.</para>
+
+    <screen>&prompt.root; <userinput>openssl genrsa -des3 -out server.key 1024</userinput>
+warning, not much extra random data, consider using the -rand option
+Generating RSA private key, 1024 bit long modulus
+...++++++
+..........................++++++
+e is 65537 (0x10001)
+Enter PEM pass phrase:
+Verifying password - Enter PEM pass phrase:</screen>
+
+    <para>Utilizziamo la chiave privata appena creata per generare un
+      certificato digitale auto-segnato che utilizzeremo con il nostro web
+      server, il certificato avr&agrave; una validità di 365 gg. a partire dalla
+      data di generazione.</para>
+
+    <screen>&prompt.root; <userinput>openssl req -new -key server.key -x509 -days 365 -out server.crt</userinput>
+Using configuration from /etc/ssl/openssl.cnf
+Enter PEM pass phrase:
+You are about to be asked to enter information that will be incorporated
+into your certificate request.What you are about to enter is what is called a Distinguished Name or a DN.There are quite a few fields but you can leave some blank. For some fields there will be a default value,
+if you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:IT
+State or Province Name (full name) [Some-State]:Italia
+Locality Name (eg, city) []:Roma
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:www.MyORG.com
+Organizational Unit Name (eg, section) []:MyUnit
+Common Name (eg, YOUR name) []:Stefano
+Email Address []:netmaster@merlinobbs.net</screen>
+
+    <para>Possiamo anche utilizzare una procedura alternativa per generare la
+      chiave privata e il relativo certificato autosegnato che prevedono una
+      durata per 365 gg.  In questo esempio genereremo i file
+      <filename>file.key</filename> e <filename>file.crt</filename>.</para>
+
+    <screen>&prompt.root; <userinput>openssl req -x509 -newkey rsa:2048 -keyout file.key -out file.crt -days 365 -nodes</userinput>
+Generating a 2048 bit RSA private key
+..........................................................................................................................................................+++
+..........+++
+writing new private key to 'file.key'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+for some fields there will be a default value,
+if you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:IT
+State or Province Name (full name) [Some-State]:Italy
+Locality Name (eg, city) []:Rome
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:MyORG
+Organizational Unit Name (eg, section) []:MyNetUnit
+Common Name (eg, YOUR name) []:Netmaster
+Email Address []:netmaster@miodominio.org</screen>
+
+    <para>Nel file <filename>/usr/local/etc/apache2/ssl.conf</filename> sono
+      presenti le direttive <literal>SSLCertificateFile</literal> e
+      <literal>SSLCertificateKeyFile</literal>, sulla scorta di queste
+      informazioni dovremo spostare i file che abbiamo appena generato nelle
+      directory indicate dalle direttive di
+      <application>Apache2</application>.</para>
+
+    <screen>&prompt.root; <userinput>ls -l *.key *.crt</userinput>
+-rw-r--r-- 1 root wheel 1257 Apr 17 11:57 battaglia.crt
+-rw-r--r-- 1 root wheel 963 Apr 17 11:54 battaglia.key
+.......
+.......</screen>
+
+    <screen>&prompt.root; <userinput>mv *.crt /usr/local/etc/apache2/ssl.crt/server.crt</userinput></screen>
+
+    <screen>&prompt.root; <userinput>mv *.key /usr/local/etc/apache2/ssl.key/server.key</userinput></screen>
+
+    <para>A questo punto sar&agrave; sufficente stoppare il servizio
+      <application>Apache2</application> e riavviarlo con il modulo
+      <emphasis>mod_ssl</emphasis> attivato:</para>
+
+    <screen>&prompt.root; <userinput>apachectl stop</userinput></screen>
+
+    <screen>&prompt.root; <userinput>apachectl sslstart</userinput></screen>
+
+    <para>Verifichiamo l'attivazione del server web
+      <application>Apache2</application>.</para>
+
+    <screen>&prompt.root; <userinput>nmap localhost</userinput>
+Starting nmap 3.20 ( www.insecure.org/nmap/ ) at 2003-04-17 12:14 CEST
+Interesting ports on localhost (127.0.0.1):
+(The 1604 ports scanned but not shown below are in state: closed)
+Port State Service
+22/tcp open ssh
+25/tcp open smtp
+80/tcp open http
+443/tcp open https
+587/tcp open submission
+3128/tcp open squid-http
+3306/tcp open mysql
+Nmap run completed -- 1 IP address (1 host up) scanned in 9.262 seconds</screen>
+
+    <para>Come abbiamo gi&agrave; accennato in precedenza, il server
+      <application>Apache2</application> verr&agrave; avviato automaticamente
+      con il processo di boot grazie allo script
+      <filename>/usr/local/etc/rc.d/apache2.sh</filename>, questo script
+      verifica la presenza del certificato digitale autosegnato (il nome dei
+      file dovr&agrave; sempre essere nel formato standard
+      <filename>server.crt</filename> e <filename>server.key</filename>) e
+      della retativa chiave privata del server.  Se la verifica avr&agrave;
+      esito positivo verr&agrave; inizializzata sia la sessione in chiaro che
+      rimarr&agrave; in ascolto sulla porta 80 e la sessione crittata (SSL) che
+      rimarr&agrave; in ascolto sulla porta 443.</para>
+  </sect1>
+
+  <sect1 id="apache2-secutiry">
+    <title>Note sulla sicurezza</title>
+
+    <para><application>Apache2</application> in fase di compilazione del codice
+      sorgente ricorre all'utilizzo delle e librerie OpenSSL (<ulink
+        url="http://www.openssl.org/">http://www.openssl.org/</ulink>), queste
+      librerie sono parte integrante di &os;.
+      <application>OpenSSL</application> &egrave; un progetto di sviluppo
+      OpenSource finalizzato a fornire una implementazione dei protocolli
+      Secure Sockets Layer (SSL v2/v3) e Transport Layer Security (TLS v1)
+      tramite la realizzazione di librerie che consentono la gestione della
+      crittografia.  Queste librerie vengono fortemente utilizzate da
+      <application>Apache2</application> grazie al modulo
+      <emphasis>mod_ssl</emphasis> che, come abbiamo visto, fornisce ad
+      <application>Apache2</application> quello strato di compatibilit&agrave;
+      che gli consente di utilizzare i protocolli SSL e TLS.</para>
+
+    <para>Le librerie OpenSSL, come molti altri software, sono soggette a
+      diversi problemi legati alla sicurezza e pertanto richiedono di essere
+      tenute costantemente aggiornate, gli sviluppatori di &os; forniscono
+      tutte le procedure di aggiornamento del sistema in caso si verifichino
+      problemi di questo tipo (<ulink
+        url="http://lists.freebsd.org/pipermail/freebsd-security-notifications/2003-October/000018.html">http://lists.freebsd.org/pipermail/freebsd-security-notifications/2003-October/000018.html</ulink>).
+      Anche il SANS Institute, in collaborazione con il National Infrastructure
+      Protection Center (NIPC) dell'FBI, include le OpenSSL tra le 20 maggiori
+      vulnerabilit&agrave; di sicurezza di Internet (<ulink
+        url="http://isc.sans.org/top20print.html#u10">http://isc.sans.org/top20print.html</ulink>).</para>
+
+    <para>Quando viene rilasciata ed applicata al sistema una patch per le
+      OpenSSL o quando viene ricompilato l'intero sistema &egrave; sempre una
+      buona norma reinstallare <application>Apache2</application>, &egrave;
+      un'ottima idea verificare anche la versione delle OpenSSL in uso prima e
+      dopo la modifica.</para>
+
+    <screen>&prompt.root; <userinput>openssl version</userinput>
+OpenSSL 0.9.7c 30 Sep 2003</screen>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/www/apache2</userinput></screen>
+    
+    <screen>&prompt.root; <userinput>make deinstall</userinput></screen>
+    
+    <screen>&prompt.root; <userinput>make reinstall</userinput></screen>
+    
+    <screen>&prompt.root; <userinput>apachectrl stop</userinput></screen>
+    
+    <screen>&prompt.root; <userinput>apachectrl sslstart</userinput></screen>
+
+    <para>Come abbiamo detto, l'aggiornamento del server web
+      <application>Apache2</application>, &egrave; richiesto anche quando si
+      procede con la ricompilazione dei sorgenti utilizzando la procedura di
+      <link linkend="update">aggiornamento del sistema</link>.
+      Nell'esempio sopracitato procediamo alla ricompilazione e
+      all'aggiornamento di <application>Apache2</application> in quanto si
+      &egrave; passati dalla versione 4.8-STABLE alla versione 4.9-RC e le
+      librerie OpenSSL sono state completamente aggiornate.</para>
+  </sect1>
+
+  <sect1 id="apache2-mod-php4">
+    <title>Installiamo il modulo mod_php4</title>
+
+    <para>Anche per installare il modulo del php4 ci affideremo al sistema dei
+      port, dobbiamo far attenzione alla modalit&agrave; di compilazione, il
+      <emphasis>mod_php4</emphasis> deve essere infatti compilato ed installato
+      compatibilmente con le modalit&agrave; di funzionamento dei module di
+      <application>Apache2</application> che sono leggermente diverse se
+      paragonate con quelle della versione precedente.</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/www/mod_php4/</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make install -DWITH_APACHE2</userinput></screen>
+
+    <para>Se necessita il runtime php, possiamo scegliere di installare il
+      php4 incluso il mod_php4.</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/lang/php4</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make install clean -DWITH_APACHE2</userinput></screen>
+
+    <para>Attenzione: l'installazione del solo <emphasis>mod_php4</emphasis>
+      esclude la compilazione e l'installazione del runtime completo di php,
+      mentre l'installazione del runtime php4 comprende anche
+      <emphasis>mod_php4</emphasis>.</para>
+
+    <para>Al termine del processo di installazione modificheremo il file di
+      configurazione di <application>Apache2</application>
+      <filename>/usr/local/etc/apache2/httpd.conf</filename>.</para>
+
+    <programlisting># attiviamo il modulo php4
+LoadModule php4_module /libexec/apache2/libphp4.so
+# attiviamo la index page
+DirectoryIndex index.html index.php
+# dichiariamo come applicazione il php
+AddType application/x-httpd-php .php .inc
+AddType application/x-httpd-php-source .phps</programlisting>
+
+    <para>Riavviamo <application>Apache2</application>.</para>
+
+    <screen>&prompt.root; <userinput>/usr/local/etc/rc.d/apache2.sh stop</userinput></screen>
+
+    <screen>&prompt.root; <userinput>/usr/local/etc/rc.d/apache2.sh start</userinput></screen>
+
+    <para>Pur non avendo trattato le modalit&agrave; di ottimizzazione della
+      configurazione di <application>Apache2</application>, con queste
+      indicazioni possiamo disporre di un server web funzionante con tutti quei
+      moduli che lo rendono immediamente pronto per essere ottimizzato ed
+      utilizzato in un'ambiente di produzione.</para>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

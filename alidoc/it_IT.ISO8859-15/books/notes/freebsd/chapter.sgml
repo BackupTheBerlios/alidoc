@@ -1,0 +1,1061 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="freebsd">
+  <title>Installare FreeBSD</title>
+
+  <sect1 id="freebsd-preamble">
+    <title>Preambolo</title>
+
+    <para>Questo capitolo si pone l'obiettivo di approfondire alcuni dei
+      molteplici aspetti relativi all'installazione del sistema, per quello che
+      concerne la procedura di installazione vera e propria, si rimanda il
+      lettore al <ulink
+        url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/install.html">Manuale
+        di FreeBSD</ulink> che dovr&agrave; essere, ora e sempre, un punto di
+      riferimento essenziale per qualsiasi tipo di attivit&agrave; inerente il
+      sistema operativo.</para>
+  </sect1>
+
+  <sect1 id="freebsd-bsd-disk">
+    <title>BSD e le unit&agrave; a disco</title>
+
+    <para>I sistemi BSD non supportano le partizioni logiche nonch&egrave; le
+      relative partizioni estese che possono essere contenute all'interno di
+      una partizione logica.</para>
+
+    <para>Questi sistemi devono essere installati necessariamente in una
+      partizione primaria, la partizione dedicata a FreeBSD prende il nome di
+      <emphasis>slice</emphasis>, all'interno di una slice &egrave; possibile
+      generare le relative partizioni per il file system UFS
+      <footnote>
+        <para>Unix File System: &egrave; il file system originario dei sistemi
+          di derivazione &unix;</para>
+      </footnote> nonch&egrave; la partizione di swap del sistema.</para>
+
+    <para>Si rammenta che i sistemi i386 consentono la creazione di un massimo
+      di quattro partizioni primarie, in una di queste quattro partizioni
+      dovr&agrave; essere installato il sistema operativo.</para>
+
+    <programlisting>
+<![CDATA[-------------------------------------------------------------
+]]><![CDATA[| disco ad0                                                 |
+]]><![CDATA[-------------------------------------------------------------
+]]><![CDATA[| s1           | s2           | s3           | s4           |
+]]><![CDATA[|--------------|--------------|--------------|--------------|
+]]><![CDATA[| sliceFreeBSD | NTFS         | Ext3 FS      | FAT32        |
+]]><![CDATA[|--------------|--------------|--------------|--------------|
+]]><![CDATA[|  | u | v | t |              |              |              |
+]]><![CDATA[|  | s | a | m |              |              |              |
+]]><![CDATA[|  | r | r | p |              |              |              |
+]]><![CDATA[| \| \ | \ | \ |              |              |              |
+]]><![CDATA[|--|---|---|---|--------------|--------------|--------------|
+]]><![CDATA[| a| b | c | d |              |              |              |
+]]><![CDATA[-------------------------------------------------------------
+]]></programlisting>
+
+    <para>Il concetto di slice, in un certo senso, tende a superare le
+      limitazioni imposte dall'architettura IA32 (x86), come possiamo vedere
+      nello schema riportato in alto, all'interno della slice vengono create le
+      partizioni del sistema operativo, vediamo anche che tutti gli altri
+      sistemi dovranno necessariamente utilizzare una partizione di disco
+      specifica.  Con FreeBSD la slice viene creata utilizzando il programma di
+      installazione &man.sysinstall.8; durante la fase di installazione del
+      sistema operativo.</para>
+  </sect1>
+
+  <sect1 id="freebsd-disk">
+    <title>FreeBSD e le unit&agrave; a disco</title>
+
+    <para>Il sistema, nel momento in cui esegue il processo di boot, riconosce
+      automaticamente tutte le unit&agrave; a disco installate, grazie al
+      comando &man.dmesg.8; &egrave; possibile controllare i messaggi di boot
+      per identificare le unit&agrave; a disco.  I dischi ATA-EIDE utilizzano il
+      driver &man.ad.4; ovvero <emphasis>generic ATA/ATAPI disk controller
+        driver</emphasis></para>
+
+    <programlisting>
+<![CDATA[ATA(4)                 FreeBSD Kernel Interfaces Manual                 ATA(4)
+]]><![CDATA[NAME
+]]><![CDATA[     ata, acd, ad, afd, ast -- generic ATA/ATAPI disk controller driver
+]]><![CDATA[SYNOPSIS
+]]><![CDATA[     For ISA based ATA/ATAPI support:
+]]><![CDATA[     device isa
+]]><![CDATA[     device ata0 at isa? port IO_WD1 irq 14
+]]><![CDATA[     device ata1 at isa? port IO_WD2 irq 15
+]]></programlisting>
+
+    <para>mentre i dischi SCSI utilizzano il driver &man.da.4; ovvero
+      <emphasis>SCSI Direct Access device driver</emphasis></para>
+
+    <programlisting>
+<![CDATA[DA(4)                  FreeBSD Kernel Interfaces Manual                  DA(4)
+]]><![CDATA[NAME
+]]><![CDATA[     da -- SCSI Direct Access device driver
+]]><![CDATA[SYNOPSIS
+]]><![CDATA[     device da
+]]><![CDATA[     device da1 at scbus0 target 4 unit 0
+]]></programlisting>
+
+    <para>identifichiamo l'unit&agrave; a disco presente nel nostro sistema
+      utilizzando il comando &man.dmesg.8;</para>
+
+    <screen>&prompt.root; <userinput>dmesg</userinput>
+...........
+<![CDATA[ad1: 19595MB <MAXTOR 6L020J1> [39813/16/63] at ata0-slave UDMA100
+]]><![CDATA[acd0: CDROM <LTN526> at ata1-slave PIO4
+]]><![CDATA[Mounting root from ufs:/dev/ad1s1a]]></screen>
+
+    <para>il partizionamento di un disco in un sistema FreeBSD &egrave; un
+      processo un p&ograve; complesso se paragonato con quello relativo ad altri
+      sistemi &unix; like come Linux, la procedura di partizionamento del disco
+      pu&ograve; essere suddivisa in due parti</para>
+
+    <orderedlist>
+      <listitem>
+        <para>la prima parte &egrave; quella relativa alla suddivisione della
+          nuova unit&agrave; a disco in partizioni fisiche che, come abbiamo
+          visto in precedenza, prendono il nome di slice, una di queste
+          partizioni o pi&ugrave; slice possono essere assegnate a
+          FreeBSD</para>
+      </listitem>
+
+      <listitem>
+        <para>la slice che abbiamo dedicato a FreeBSD deve essere a sua volta
+          suddivisa in ulteriori partizioni nelle quali verranno creati i
+          relativi file systems UFS oltre che alla partizione dedicata allo
+          spazio per il file di swap</para>
+      </listitem>
+    </orderedlist>
+
+    <para>Per suddividere il disco e creare le partizioni fisiche, le
+      slide, pu&ograve; essere utilizzata l'utility di installazione
+      &man.sysinstall.8;, in alternativa pu&ograve; anche essere utilizzata
+      l'utility &man.fdisk.8; che ci aiuter&agrave; a suddividere fisicamente
+      il disco in slices.  Nell'esempio sottostante creiamo una slice che
+      include l'intero disco</para>
+
+    <screen>&prompt.root; <userinput>fdisk -i /dev/ad1</userinput></screen>
+
+    <para>La slice &egrave; pronta a ricevere una <emphasis>label</emphasis>,
+      una label BSD consente di creare sino ad 8 partizioni i cui nomi vanno
+      da <emphasis>a</emphasis> sino ad <emphasis>h</emphasis>, la partizione
+      <emphasis>a</emphasis> &egrave; quella di root, la partizione
+      <emphasis>b</emphasis> &egrave; quella di swap mentre la partizione
+      <emphasis>c</emphasis> indica l'intera slide.  Il comando
+      &man.disklabel.5; ci aiuter&agrave; a creare le partizioni FreeBSD
+      all'interno della slice, il parametro <option>auto</option> consente di
+      generare un layout di default per questa slice</para>
+
+    <screen>&prompt.root; <userinput>disklabel -r -w ad1 auto</userinput></screen>
+
+    <para>il flag <option>-r</option> consente di accedere al disco in modo
+      diretto, il flag <option>-w</option> richiede anche di indicare il
+      dispositivo del disco (<devicename>ad1</devicename> nel nostro caso).
+      Grazie al comando <command>disklabel -e</command> &egrave; ora possibile
+      editare le label impostate di default, l'opzione <option>-e</option>
+      specifica la variabile <literal>editor</literal> con la quale si avvia una
+      sessione testuale che consentir&agrave; di editare e modificare il
+      partizionamento.  Dopo aver creato le partizioni possiamo finalmente
+      generare il filesystem UFS utilizzando il comando &man.newfs.8;</para>
+
+    <screen>&prompt.root; <userinput>newfs /dev/ad1s1a</userinput></screen>
+
+    <para>Con il comando &man.fsck.8; possiamo verificare che il file system sia
+      realmente funzionante</para>
+
+    <screen>&prompt.root; <userinput>fsck /dev/ad1s1a</userinput></screen>
+
+    <para>ora &egrave; possibile montare il file system con il comando
+      &man.mount.8;</para>
+
+    <screen>&prompt.root; <userinput>mount /dev/ad1s1a /</userinput></screen>
+
+    <para>per abilitare lo spazio disco dedicato al file di paginazione della
+      memoria (file di swap) dovremmo utilizzare il comando
+      &man.swapon.8;</para>
+
+    <screen>&prompt.root; <userinput>swapon /dev/ad1s1b</userinput></screen>
+
+    <para>le entry contenute nel file <filename>/etc/fstab</filename>
+      consentiranno di caricare automaticamente tutti i file systems
+      all'abbiamento del sistema, a questo punto riassumiamo come FreeBSD vede
+      le device disco:</para>
+
+    <programlisting>
+<![CDATA[ad0    # primo disco IDE
+]]><![CDATA[ad0s1e # partizione "e" della slice1 del primo disco IDE
+]]><![CDATA[ad1    # secondo disco IDE
+]]><![CDATA[ad1s1a # partizione "a" della slice1 del secondo disco IDE
+]]><![CDATA[ad2    # terzo disco IDE
+]]><![CDATA[ad2s1c # partizione "c" della slice1 del terzo disco IDE
+]]><![CDATA[ad3    # quarto disco IDE
+]]><![CDATA[ad3s1f # partizione "f" della slice1 del quarto disco IDE
+]]></programlisting>
+
+    <para>dopo aver analizzato come utilizzare le unit&agrave; a disco possiamo
+      concludere questo paragrafo affermando che un semplice errore in fase di
+      creazione di una slice pu&ograve; compromettere per sempre il
+      funzionamento del Vostro sistema, &egrave; quindi sempre una buona idea
+      utilizzare il programma &man.sysinstall.8;.</para>
+  </sect1>
+
+  <sect1 id="freebsd-softupdate">
+    <title>Softupdate</title>
+
+    <para>Come abbiamo gi&agrave; scritto in precedenza Il file system
+      utilizzato da FreeBSD &egrave; UFS (Unix File System), le nuove versioni
+      di UFS implementate nei sistemi FreeBSD, offrono una feature
+      denominata <emphasis>softupdate</emphasis>.  Questa funzionalit&agrave;
+      &egrave; stata aggiunta nella prima met&agrave; degli anni '90 per
+      rendere i file system dei sistemi BSD immediatamente disponibili
+      all'utilizzo in caso di guasto (fault).</para>
+
+    <para>I softupdate, per le loro peculiarit&agrave;, possono essere
+      paragonati ai file system di tipo <emphasis>journaled</emphasis> che,
+      negli ultimi anni, sono stati inseriti anche nei sistemi Linux (a
+      partire dal Kernel 2.4).  Un esempio di <emphasis>Journaling file
+        system</emphasis> incluso nei sistemi Linux &egrave;
+      <emphasis>Ext3</emphasis> o <emphasis>RaiserFS</emphasis> mentre l'UFS
+      incluso nei sistemi Solaris &egrave; una versione journaled di FFS (BSD
+      Fast File System).</para>
+
+    <para>Un <emphasis>journaling file system</emphasis> scrive metadati
+      all'interno di un file di log, si tratta di un semplice file sequenziale
+      nel quale vengono salvare le informazioni prima che un qualsiasi comando
+      venga eseguito sul sistema, i metadati verranno successivamente trasferiti
+      dal file di log alla loro reale destinazione.  Se una unit&agrave; a
+      disco va in errore sar&agrave; proprio il file di log che
+      consentir&agrave; di riportare i dati sul disco ad una condizione di
+      consistenza.</para>
+
+    <para>I softupdate riordinano e raggruppano le diverse operazioni di
+      modifica dei metadati.  Con questo sistema vengono praticamente
+      eliminati i problemi che potrebbero affliggere una macchina che rimane
+      priva di alimentazione o di una macchina in
+      <emphasis>crash</emphasis>.</para>
+
+    <para>FreeBSD abilita la funzionalit&agrave; dei softupdate in fase di
+      installazione del sistema e la rende disponibile su tutte le partizioni
+      ad eccezione di quella di <emphasis>root</emphasis>.  Tramite il comando
+      &man.mount.8; &egrave; possibile verificare l'attivazione delle
+      softupdate:</para>
+
+    <screen>&prompt.root; <userinput>mount</userinput>
+/dev/ad0s1a on / (ufs, local)
+/dev/ad0s1f on /tmp (ufs, local, soft-updates)
+/dev/ad0s1g on /usr (ufs, local, soft-updates)
+/dev/ad0s1e on /var (ufs, local, soft-updates)
+procfs on /proc (procfs, local)</screen>
+
+    <para>vediamo ora le partizioni disco di un sistema in produzione su
+      RAID5:</para>
+
+    <screen>&prompt.root; <userinput>df</userinput>
+Filesystem 1K-blocks Used Avail Capacity Mounted on
+/dev/da0s1a 128990 35944 82728 30% /
+/dev/da0s1g 8257742 2 7597122 0% /cache
+/dev/da0s1f 257998 16 237344 0% /tmp
+/dev/da0s1d 10500362 1246322 8414012 13% /usr
+/dev/da0s1e 257998 4724 232636 2% /var
+/dev/da0s1h 13419070 2 12345544 0% /webdata
+procfs 4 4 0 100% /proc</screen>
+
+    <para>per abilitare la funzionalit&agrave; softupdate su una partizione
+      &egrave; necessario smontare la partizione e utilizzare il comando
+      &man.tunefs.8; (&egrave; consigliabile eseguire l'operazione
+      dopo aver eseguito il boot del sistema in <link
+        linkend="freebsd-single-user">modalit&agrave; single user</link>)</para>
+
+    <screen>&prompt.root; <userinput>umount /dev/ad0s1d</userinput></screen>
+    <screen>&prompt.root; <userinput>tunefs -n enable /dev/ad0s1d</userinput></screen>
+
+    <para>per controllare una partizione &egrave; necessario avviare il sistema
+      in <link linkend="freebsd-single-user">modalit&agrave; single user</link>
+      e, dopo aver propriamente smontato la partizione per la quale vogliamo
+      eseguire un controllo approfondiato, possiamo servirci del comando
+      &man.fsck.8;</para>
+
+    <screen>&prompt.root; <userinput>fsck /dev/ad1s1a</userinput></screen>
+
+    <para>per finire c'&egrave; da dire che, per incrementare le dimensioni di
+      un file system esistente, possiamo anche utilizzare il comando
+      &man.growfs.8;.  Maggiori dettagli sulla messa a punto delle unit&agrave;
+      a disco potranno essere reperite direttamente sull'handbook alla URL
+      <ulink
+        url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/configtuning-disk.html">http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/configtuning-disk.html</ulink></para>
+  </sect1>
+
+  <sect1 id="freebsd-backup">
+    <title>Strumenti per il Backup</title>
+
+    <para>I dati vengono comunemente memorizzati nelle unit&agrave; a disco e
+      FreeBSD, come qualsiasi altro sistema &unix; like, dispone di alcuni
+      comandi che consentono di archiviare e mettere al sicuro le informazioni
+      pi&ugrave; importanti.</para>
+
+    <para>L'utility &man.tar.1;, <emphasis>tape archiver</emphasis>, consente
+      di creare degli archivi di file nel formato tar, l'opzione
+      <option>c</option> serve per creare un nuovo file, l'opzione
+      <option>v</option> imposta la modalit&agrave; verbose e per finire
+      l'opzione <option>f</option>consente di creare il nuovo output sul
+      disco</para>
+
+    <screen>&prompt.user; <userinput>mkdir /usr/backup</userinput></screen>
+
+    <screen>&prompt.user; <userinput>tar cvf /usr/backup/etc.tar /etc/</userinput></screen>
+
+    <para>l'utility &man.gzip.1; comprime l'archivio, l'opzione
+      <option>-9</option> imposta il massimo livello di compressione</para>
+
+    <screen>&prompt.user; <userinput>gzip -9 /usr/backup/etc.tar</userinput></screen>
+
+    <para>dopo aver archiviato e compresso la directory
+      <filename>/etc</filename> procediamo con il backup di
+      <filename>/usr/local/etc</filename> che contiene tutte le configurazioni
+      dei programmi eseguiti come processi locali</para>
+
+    <screen>&prompt.user; <userinput>tar cvf /usr/backup/usr.local.etc.tar /usr/local/etc/</userinput></screen>
+    <screen>&prompt.user; <userinput>gzip -9 /usr/backup/usr.local.etc.tar</userinput></screen>
+    <screen>&prompt.user; <userinput>ls /usr/backup/</userinput>
+total 644
+drwxr-xr-x   2 root  wheel     512 Aug 27 13:05 ./
+drwxr-xr-x  20 root  wheel     512 Aug 27 13:00 ../
+]-rw-r--r--   1 root  wheel  400379 Aug 27 13:02 etc.tar.gz
+-rw-r--r--   1 root  wheel  212523 Aug 27 13:05 usr.local.etc.tar.gz</screen>
+
+    <para>Dopo aver eseguito i backup possiamo ripristinare i file in qualsiasi
+      momento</para>
+
+    <screen>&prompt.user; <userinput>tar zxvf /usr/backup/etc.tar.gz</userinput></screen>
+
+    <para>possiamo copiare tutti i file contenenti i backup su un disco
+      removibile, su una unit&agrave; a nastro, oppure tramite le opportune
+      applicazioni, &egrave; anche possibile eseguire dei trasferimenti di file
+      sulla rete.</para>
+  </sect1>
+
+  <sect1 id="freebsd-file-security">
+    <title>Sicurezza dei file e del file system</title>
+
+    <para>Nei sistemi &unix; like come FreeBSD, &egrave; molto importante
+      tenere sotto controllo i file ed il file system, il processo di analisi
+      che definisce la protezione di un file system &egrave; molto spesso
+      antecendente all'installazione del Sistema Operativo.  &Egrave; infatti
+      una buona norma pianificare l'utilizzo del file system sulla base di
+      esigenze reali, pianificando prima su carta l'assegnazione dello spazio
+      su disco.</para>
+
+    <para>I file <emphasis>SUID</emphasis> e <emphasis>SGID</emphasis>
+      rappresentano un potenziale rischio visto che assegnano speciali privilegi
+      all'utente che li esegue ed i processi che vengono scaturiti da questi
+      file, se eseguibili, hanno accesso diretto alle risorse del sistema.
+      Questo tipo di file dovrebbero sempre essere tenuti sotto controllo,
+      l'attributo SUID viene definito per i file mentre lo SGID definisce per
+      il <emphasis>group id</emphasis>.</para>
+
+    <programlisting>
+<![CDATA[# Vedi la pagina man di fstab(5) per informazioni su come montare in
+]]><![CDATA[# modo automatico file system via rete prima di modificare questo file.
+]]><![CDATA[#
+]]><![CDATA[# Device       Mountpoint      FStype  Options                 Dump Pass
+]]><![CDATA[/dev/ad0s1b    none            swap    sw                      0    0
+]]><![CDATA[/dev/ad0s1a    /               ufs     rw                      1    1
+]]><![CDATA[/dev/ad0s1f    /tmp            ufs     rw,nosuid               2    2
+]]><![CDATA[/dev/ad0s1g    /usr            ufs     rw                      2    2
+]]><![CDATA[/dev/ad0s1e    /var            ufs     rw,nosuid               2    2
+]]><![CDATA[/dev/ad2s2a    /home           ufs     rw,nosuid               2    2
+]]><![CDATA[/dev/acd0c     /cdrom          cd9660  ro,noauto               0    0
+]]><![CDATA[proc           /proc           procfs  rw                      0    0
+]]></programlisting>
+
+    <para>Non vi &egrave; alcun valido motivo per il quale le home directory
+      permettano agli utenti di usare programmi SUID/SGID, nell'esempio a
+      margine vediamo un file <filename>/etc/fstab</filename> in cui &egrave;
+      stata impostata l'opzione <option>nosuid</option> per quello che concerne
+      le partizioni di <filename>/home</filename>, <filename>/var</filename> e
+      <filename>/tmp</filename>.  Settando anche le opzioni
+      <option>noexec</option> e <option>nodev</option> possiamo proibire agli
+      utenti normali l'utilizzo dei programmi, l'eventuale creazione di file
+      eseguibili nonch&egrave; la possibilit&agrave; di montare sul sistema
+      possibili device</para>
+
+    <programlisting>
+<![CDATA[# Device       Mountpoint      FStype  Options                 Dump Pass
+]]><![CDATA[/dev/ad1s1f    /tmp            ufs     rw,nosuid,noexec,nodev  2    2
+]]><![CDATA[/dev/ad1s1g    /usr            ufs     rw,nodev                2    2
+]]><![CDATA[/dev/ad1s1e    /var            ufs     rw,nosuid,noexec,nodev  2    2
+]]><![CDATA[/dev/ad2s2a    /home           ufs     rw,nosuid,noexex,nodev  2    2
+]]><![CDATA[
+]]></programlisting>
+
+    <para>In questo esempio vediamo un sistema <quote>blindato</quote> sul quale
+      per&ograve; non sar&agrave; possibile eseguire la rebuild del sistema, si
+      rammenta anche che nelle procedure periodiche giornaliere di FreeBSD
+      troviamo una utility studiata per controllare le eventuali variazioni
+      dello SUID notificando il report, positivo o negativo che sia, via e-mail.
+      Un altro strumento molto potente per il controllo dell'integrit&agrave;
+      del file system &egrave; <ulink
+        url="http://www.tripwire.org/">TripWire</ulink>.</para>
+  </sect1>
+
+  <sect1 id="freebsd-boot-loader">
+    <title>Il boot loader di FreeBSD</title>
+
+    <para>In fase di installazione si pu&ograve; procedere con l'installazione
+      del <emphasis>boot loader</emphasis> originale di FreeBSD, se si
+      utilizzano pi&ugrave; Sistemi Operativi &egrave; quindi anche possibile
+      mantenere boot manager attuale (Lilo
+      <footnote>
+        <para>Il Lilo &egrave; il bootmanager di Linux maggiormente utilizzato</para>
+      </footnote> o Grub
+      <footnote>
+        <para>Grub &egrave; il bootmanager di <ulink
+            url="http://www.redhat.com/">Linux Red Hat</ulink>, tra le
+          peculiarit&agrave; c'&egrave; quella di non dover ricompilare il
+          codice in caso di modifica</para>
+      </footnote> se si utilizza Linux) al quale dovr&agrave; per&ograve;
+      essere aggiunta la partizione (slide) che abbiamo dedicato a FreeBSD.
+      Anche questa opzione potr&agrave; essere selezionata utilizzando il
+      programma di installazione &man.sysinstall.8;.</para>
+
+    <para>Il <emphasis>boot loader</emphasis> di FreeBSD &egrave; semplice ed
+      efficente e si compone di due parti: una risiede nell'MBR (Master
+      Boot Record) del disco fisso e l'altra che risiede nella partizione di
+      root di FreeBSD.  Maggiori dettagli sul <emphasis>boot loader</emphasis>,
+      l'MBR (Master Boot Record) e gli stadi di avvio di un sistema FreeBSD
+      possono essere reperiti direttamente sul <ulink
+        url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/boot-blocks.html">Manuale di FreeBSD</ulink></para>
+  </sect1>
+
+  <sect1 id="freebsd-bad-mbr">
+    <title>Si &egrave; rovinato il boot loader</title>
+
+    <para>Pu&ograve; anche accadere che si rovini l'MBR
+      <footnote>
+        <para>Master Boot Record: &egrave; il record di avviamento di
+          qualsiasi hard disk</para>
+      </footnote> con il relativo boot loader, anche in questo caso non
+      dobbiamo andare nel panico visto che ripristinare il <emphasis>boot
+        loader</emphasis> di FreeBSD non &egrave; difficile.</para>
+
+    <para>Inserire nel lettore CD il disco di installazione, per ripristinare
+      il boot loader nell'MBR dovremo utilizzare il programma di installazione
+      &man.sysinstall.8;, selezionando la sezione
+      <guimenuitem>Configure</guimenuitem> sceglieremo di utilizzare il
+      liveCD di FreeBSD (contenuto nel disco n. 2).</para>
+
+    <para>Attenzione, ai possessori dei CD FreeBSD-5.0 distribuiti dalla
+      rivista Linux&amp;C, va segnalato il fatto che il disco n. 2 non &egrave;
+      un disco liveCD.  A questo punto dalla shell di sistema (
+      <keycombo action="simul">
+        <keycap>Alt</keycap>
+        <keycap>F4</keycap>
+      </keycombo>) dovremo digitare il seguente comando</para>
+
+    <screen>&prompt.user; <userinput>boot0cfg -B /dev/ad0</userinput></screen>
+
+    <para>Con questo sistema si procede all'installazione della porzione di boot
+      loader che risiede nel MBR (Master Boot Record).</para>
+  </sect1>
+
+  <sect1 id="freebsd-shell">
+    <title>La shell</title>
+
+    <para>La shell &egrave; uno dei programmi pi&ugrave; importanti di un
+      Sistema Operativo dopo il Kernel, in particolare si tratta di un programma
+      che consente all'utente di impartire comandi, i comandi consentono agli
+      utenti, in particolare all'amministratore del sistema, di interagire
+      direttamente con il Kernel di sistema.  La shell &egrave; quindi un
+      ambiente di lavoro che funziona a riga di comando, le istruzioni
+      consentono di visualizzare lo spazio sul file system, di listare una
+      directory o di cancellare un file.</para>
+
+    <para>FreeBSD pu&ograve; essere utilizzato con diversi tipi di shell:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>Bourne Shell</emphasis> (&man.sh.1;) &egrave; la
+          pi&ugrave; vecchia e prende il nome dal suo creatore, Stephen Bourne.
+          Si tratta di una shell molto primitiva se paragonata con quelle
+          pi&ugrave; moderne e funzionali</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>C Shell</emphasis> (&man.csh.1;) prende questo nome
+          perch&egrave; &egrave; stata disegnata per fornire una sintassi molto
+          simile a quella del linguaggio C ed &egrave; stata sviluppata per i
+          sistemi BSD dalla <emphasis>University of California
+            Berkeley</emphasis></para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Korn Shell</emphasis> (<filename
+            role="package">shells/ksh93</filename> - <filename
+            role="package">shells/pdksh</filename>) &egrave; stata la risposta
+          di AT&amp;T alla C Shell ed &egrave; compatibile a ritroso con la
+          Bourne Shell, Korn Shell &egrave; molto popolare nei sistemi
+          &unix;</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Bash Shell</emphasis> (&man.bash.1;) &egrave; il
+          diminutivo di Bourne Again Shell che &egrave; stata sviluppata dalla
+          Free Software Foundation, come la Korn Shell &egrave; compatibile con
+          la Bourne Shell e include diverse feature come la possibilit&agrave;
+          di visualizzare la storia dei comandi editati nonch&egrave; il
+          completamento automatico dei comandi, &egrave; molto popolare nelle
+          distribuzioni di Linux</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>Tcsh Shell</emphasis> (&man.tcsh.1;) &egrave; una Shell
+          di tipo C molto avanzata, include diverse feature che sono molto
+          simili a quelle della Bash Shell, Tcsh &egrave; la Shell di default
+          dell'utente <username>root</username> nei sistemi FreeBSD</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Le shell dei sistemi &unix; sono molto apprezzate dagli sviluppatori
+      di software perch&egrave; integrano anche dei linguaggi di scripting molto
+      potenti che consentono di automatizzare le procedure di sistema, la shell
+      &egrave; un elemento fondamentale per la gestione remota dei
+      sistemi.</para>
+  </sect1>
+
+  <sect1 id="freebsd-bash">
+    <title>Bash come shell di FreeBSD</title>
+
+    <para>Come abbiamo detto la Bash Shell &egrave; una delle shell pi&ugrave;
+      famose negli ambienti &unix; ed &egrave; l'interprete dei comandi
+      maggiormente utilizzato nei sistemi GNU
+      <footnote>
+        <para>La Free Software Foundation (<ulink
+            url="http://www.fsf.org/">FSF</ulink>) &egrave; la principale
+          organizzazione che sponsorizza il Progetto GNU</para>
+      </footnote>, in particolare &egrave; lo standard dei sistemi GNU
+      Linux.</para>
+
+    <para>Sempre utilizzando il programma di installazione &man.sysinstall.8;
+      potremmo procedere con l'installazione della &man.bash.1;, che
+      successivamente imposteremo come come la shell di default di
+      sistema.</para>
+
+    <para>Impostando la variabile d'ambiente <literal>PS1</literal> &egrave;
+      possibile modificare e personalizzare il prompt della shell (meglio
+      conosciuto come prompt di sistema), di seguito forniamo alcuni caratteri
+      che possono essere utilizzati per personalizzare il prompt di &man.bash.1;
+      (per maggiori dettagli consultare le <ulink
+        url="http://www.gufi.org/~rionda/docs/ps1.html">BSD-FAQ-it</ulink>)</para>
+
+    <programlisting>
+<![CDATA[\u : user corrente
+]]><![CDATA[\h : hostname
+]]><![CDATA[\w : directory corrente
+]]><![CDATA[\@ : ora corrente, in formato 12H am/pm
+]]><![CDATA[\t : ora corrente, in formato HH:MM:SS
+]]><![CDATA[\d : la data, in formato giorno della settimana, mese, data
+]]></programlisting>
+
+    <para>Di seguito vi proponiamo il file <filename>/etc/profile</filename>
+      modificato per essere utilizzato unicamente con la &man.bash.1;,
+      verr&agrave; anche definito un alias per il comando &man.ls.1; che
+      consentir&agrave; di visualizzare le directory ed i file di sistema con
+      diverse colorazioni</para>
+
+    <programlisting>
+<![CDATA[export PS1="[\u@\h \W]\\$ "
+]]><![CDATA[alias ls='ls -alFG'
+]]></programlisting>
+
+    <para>Editando il solo file <filename>.profile</filename>, che &egrave;
+      contenuto nella home directory dell'utente, &egrave; possibile
+      personalizzare il prompt di shell del singolo profilo.</para>
+
+    <screen>&prompt.user; <userinput>more .profile</userinput>
+...........
+export PS1="[\[$(tput md)\]\t <\w>\[$(tput me)\]] $(echo $?) \$ "
+alias ls='ls -alFG'</screen>
+
+    <para>A questo punto possiamo definire la &man.bash.1; come shell di
+      sistema per l'utente toor</para>
+
+    <screen>&prompt.root; <userinput>chsh - s /usr/local/bin/bash toor</userinput></screen>
+
+    <para>Per pulire lo schermo quando si esegue il logout dal sistema
+      sar&agrave; necessario creare il file <filename>.bash_logout</filename>.
+      Vediamo ora il contenuto di questo file:</para>
+
+    <screen>&prompt.user; <userinput>more .bash_logout</userinput>
+clear</screen>
+  </sect1>
+
+  <sect1 id="freebsd-bash-prompt">
+    <title>Bash e il prompt colorato</title>
+
+    <para>Per personalizzare la shell utilizzando &man.bash.1; sar&agrave;
+      necessario creare alcuni file di configurazione come
+      <filename>.bash_profile</filename> e <filename>.bashrc</filename>, questi
+      file dovranno essere generati direttamente nella home directory
+      dell'utente.  Se i file verranno creati all'interno di una macchina che
+      funziona come gateway o come firewall avranno assegnato il valore
+      <literal>chmod 600</literal>.  Se invece si dovesse trattare di una
+      macchina di tipo Workstation, i file dovranno avere assegnato il valore
+      <literal>chmod 655</literal>.  I file dovranno naturamente essere
+      assegnati al rispettivo proprietario (utente).  Per la Workstation
+      utilizzeremo la umask 022 mentre utilizzeremo una umask 077 per una
+      macchina che esegue un sistema firewall o una gateway.  Maggiori
+      informazioni e riferimenti possono essere reperiti alla URL: <ulink
+        url="http://freebsd.la3sg.net/">http://freebsd.la3sg.net/</ulink>.</para>
+
+    <screen>&prompt.user; <userinput>touch .bash_profile</userinput></screen>
+    <screen>&prompt.user; <userinput>touch .bashrc</userinput></screen>
+    <screen>&prompt.user; <userinput>touch .bash_logout</userinput></screen>
+    <screen>&prompt.user; <userinput>chmod 600 .bash_profile .bashrc .bash_logout</userinput></screen>
+
+    <para>trattiamo alcune informazioni di carattere generale che ci saranno
+      utili ad impostare un prompt di shell colorato</para>
+
+    <programlisting>
+<![CDATA[Utilizzare "\e" escape code per generare l'ANSI escape code
+]]><![CDATA[Utilizzare "\[ and \]" all'inizio e alla fine del codice ANSI
+]]></programlisting>
+
+    <para>per esempio</para>
+
+    <programlisting>
+<![CDATA["\[\e[0;31m\]color"
+]]></programlisting>
+
+    <para>vediamo ora come funzionano gli ANSI attribute code, la sequenza di
+      escape ANSI ha il formato
+      <quote><keycap>ESC</keycap>[<replaceable>X</replaceable>;<replaceable>Ym</replaceable></quote>,
+      dove <keycap>ESC</keycap> &egrave; il carattere di escape (octal 033).
+      I valori <replaceable>X</replaceable> e, opzionalmente
+      <replaceable>Y</replaceable> rappresentano uno dei seguenti codici
+      escape</para>
+
+    <para>attribute code</para>
+
+    <programlisting>
+<![CDATA[00 = none
+]]><![CDATA[01 = bold
+]]><![CDATA[04 = underscore
+]]><![CDATA[05 = blink
+]]><![CDATA[07 = reverse
+]]><![CDATA[08 = concealed
+]]></programlisting>
+
+    <para>text color code</para>
+
+    <programlisting>
+<![CDATA[30 = black
+]]><![CDATA[31 = red
+]]><![CDATA[32 = green
+]]><![CDATA[33 = yellow
+]]><![CDATA[34 = blue
+]]><![CDATA[35 = magenta
+]]><![CDATA[36 = cyan
+]]><![CDATA[37 = white
+]]></programlisting>
+
+    <para>background color code</para>
+
+    <programlisting>
+<![CDATA[40 = black
+]]><![CDATA[41 = red
+]]><![CDATA[42 = green
+]]><![CDATA[43 = yellow
+]]><![CDATA[44 = blue
+]]><![CDATA[45 = magenta
+]]><![CDATA[46 = cyan
+]]><![CDATA[47 = white
+]]></programlisting>
+
+    <para>La sequenza
+      <quote><keycap>ESC</keycap>[1;32myafcrules<keycap>ESC</keycap>[0m</quote>
+      trasformer&agrave; la stringa <quote>yafc rules</quote> nel colore
+      verde, successivamente l'attributo verr&agrave; ripristinato
+      normalmente.</para>
+
+    <para>Abbiamo gi&agrave; detto che per presonalizzare il prompt di
+      &man.bash.1; occorrono due file di configurazione,
+      <filename>.bash_profile</filename> e <filename>.bashrc</filename>.
+      Possiamo ricorrerre all'utilizzo del file <filename>.profile</filename>
+      (gi&agrave; presente) per ottenere un file
+      <filename>.bash_profile</filename> e dunque finalmente personalizzare il
+      prompt della shell.  La configurazione che vi propongo prender&agrave; il
+      nome di <quote>aquilotto</quote>.</para>
+
+    <screen>&prompt.user; <userinput>cp .profile .bash_profile</userinput></screen>
+
+    <para>Vediamo ora il contenuto di <filename>.bash_profile</filename>:</para>
+
+    <screen>&prompt.user; <userinput>more .bash_profile</userinput>
+#
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
+export PATH
+HOME=/root
+export HOME
+TERM=${TERM:-cons25}
+export TERM
+PAGER=more
+export PAGER
+umask 022
+export PS1='\[\e[0m\]\[\e[0m\]\[\e[36m\]\u\[\e[00m\]@\[\[\e[0m\]\[\e[36m\]\h\[\e[00m\]:\[\e[34m\]$PWD\[\e[0m\]\[\e[01m\]\[\e[0m\]> '
+alias ls='ls -alFG'
+alias dir='ls -l'
+alias rm='rm -i'</screen>
+
+    <screen>&prompt.user; <userinput>more .bash_profile</userinput>
+#
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/X11R6/bin
+export PATH
+HOME=/root
+export HOME
+TERM=${TERM:-cons25}
+export TERM
+PAGER=more
+export PAGER
+umask 022
+export PS1='\[\e[0m\]\[\e[0m\]\[\e[36m\]\u\[\e[00m\]@\[\[\e[0m\]\[\e[36m\]\h\[\e[00m\]:\[\e[34m\]$PWD\[\e[0m\]\[\e[01m\]\[\e[0m\]> '
+alias ls='ls -alFG'
+alias dir='ls -l'
+alias rm='rm -i'</screen>
+
+    <para>Vediamo ora il contenuto di <filename>.bashrc</filename>:</para>
+
+    <screen>&prompt.user; <userinput>more .bashrc</userinput>
+umask 022
+export PS1='\[\e[0m\]\[\e[0m\]\[\e[36m\]\u\[\e[00m\]@\[\[\e[0m\]\[\e[36m\]\h\[\e[00m\]:\[\e[34m\]$PWD\[\e[0m\]\[\e[01m\]\[\e[0m\]> '
+alias ls='ls -alFG'
+alias dir='ls -l'</screen>
+
+    <para>Vediamo ora il contenuto del file
+      <filename>.bash_logout</filename>:</para>
+
+    <screen>&prompt.user; <userinput>more .bash_logout</userinput>
+clear</screen>
+
+    <para>Utilizzando questo tipo di configurazione non sar&agrave;
+      pi&ugrave; necessario ricorrere alla modifica del file
+      <filename>/etc/profile</filename> visto che sar&agrave; cos&igrave;
+      possibile modificare il solo aspetto della shell desiderata.</para>
+  </sect1>
+
+  <sect1 id="freebsd-toor">
+    <title>L'utente toor</title>
+
+    <para>L'utente <username>toor</username> &egrave; un clone dell'utente
+      <username>root</username> (<username>toor</username> non &egrave; altro
+      che <username>root</username> scritto al contrario).</para>
+
+    <para>Dopo aver installato il sistema operativo &egrave; necessario
+      assegnare una password all'utente <username>toor</username>, il sistema
+      al momento dell'installazione, non prevede l'assegnazione di una
+      password per l'utente <username>toor</username>.</para>
+
+    <para>Al login post-installazione sar&agrave; sufficente accreditarsi come
+      utente <username>toor</username> e per ottenere accesso totale e
+      incondizionato e produrre danni di ogni tipo.</para>
+
+    <screen>&prompt.root; <userinput>passwd toor</userinput>
+Changing local password for toor
+New Password:
+Retype New Password:</screen>
+  </sect1>
+
+  <sect1 id="freebsd-su">
+    <title>Utenti che possono effettuare su</title>
+
+    <para>L'amministrazione remota &egrave; molto importante, possiamo concedere
+      accesso remoto al nostro sistema grazie a diverse applicazioni che rendono
+      possibile questo tipo di collegamento.  L'applicativo &man.telnet.1; o il
+      pi&ugrave; sicuro Openssh
+      <footnote>
+        <para>OpenSSH - sostituisce il vecchio &man.telnet.1; e consente di
+          accere da remoto utilizzando un tunnel crittografato che consente
+          maggiore sicurezza e ci pone al riparo dalla tecnica dello
+          <emphasis>sniffing</emphasis>.</para>
+      </footnote> (<ulink url="http://www.openssh.org">Secure Shell</ulink>)
+      sono i programmi che vengono maggiormente utilizzati per la gestione
+      remota dei sistemi &unix;, OpenSSH &egrave; stato ideato per rimpiazzare
+      &man.rsh.1;, man.rlogin.1 ed altri comandi Berckeley ma viene anche
+      comunemente utilizzato per sostituire applicazioni come &man.telnet.1;
+      ed &man.ftp.1;.  OpenSSH &egrave; basato sulla versione originale
+      scritta da Tatu Ylonen e viene attualmente sviluppato dal Team di
+      OpenBSD.</para>
+
+      <para>&Egrave; opportuno creare alcuni utenti di sistema ai quali
+        verr&agrave; consentito di effettuare la tecnica della
+        <emphasis>substitute user</emphasis> (comando &man.su.1;) per
+        concedergli la facolt&agrave; di loggarsi al sistema come utenti
+        amministratori <username>root</username>.</para>
+
+      <para>Non &egrave; bene lasciare un server &man.sshd.8; con l'accesso
+        dell'utente <username>root</username> abilitato, FreeBSD infatti
+        fornisce una versione customizzata di OpenSSH che, come default,
+        disabilita l'accesso remoto del super utente.</para>
+
+      <para>Per consentire ad alcuni utenti di sistema di divenire
+        <username>root</username> sar&agrave; necessario censirli come
+        appartenenti del gruppo <groupname>wheel</groupname>, ovvero il
+        gruppo degli utenti amministratori di sistema.  Per aggiungete gli
+        utenti al gruppo <groupname>wheel</groupname> utilizziamo sempre il
+        programma di installazione &man.sysinstall.8;: vediamo ora una piccola
+        parte del file <filename>/etc/group</filename>.</para>
+
+    <programlisting>
+<![CDATA[wheel:*:0:root,pluto
+]]><![CDATA[daemon:*:1:
+]]><![CDATA[kmem:*:2:
+]]><![CDATA[sys:*:3:
+]]></programlisting>
+
+    <para>Nell'esempio di cui sopra l'utente <username>pluto</username>, che fa
+      parte del gruppo <groupname>wheel</groupname>, sar&agrave; autorizzato ad
+      effettuare la <emphasis>substitute user</emphasis> e quindi verr&agrave;
+      accreditato al sistema con i massimi privilegi nell'amministrazione della
+      macchina.</para>
+  </sect1>
+
+  <sect1 id="freebsd-motd">
+    <title>Il file <filename>/etc/motd</filename></title>
+
+    <para>Con questo file &egrave; possibile personalizzare il messaggio di
+      benvenuto al sistema, il file con il messaggio di benvenuto che &egrave;
+      stato installato come default da FreeBSD contiene il seguente
+      disclaimer:</para>
+
+    <programlisting>
+<![CDATA[FreeBSD 4.8-RELEASE (GENERIC) #0: Thu Apr  3 10:53:38 GMT 2003
+]]><![CDATA[Welcome to FreeBSD!
+]]><![CDATA[Before seeking technical support, please use the following resources:
+]]><![CDATA[o  Security advisories and updated errata information for all releases are
+]]><![CDATA[   at http://www.FreeBSD.org/releases/ - always consult the ERRATA section
+]]><![CDATA[   for your release first as it's updated frequently.
+]]><![CDATA[o  The Handbook and FAQ documents are at http://www.FreeBSD.org/ and,
+]]><![CDATA[   along with the mailing lists, can be searched by going to
+]]><![CDATA[   http://www.FreeBSD.org/search/.  If the doc distribution has
+]]><![CDATA[   been installed, they're also available formatted in /usr/share/doc.
+]]><![CDATA[If you still have a question or problem, please take the output of
+]]><![CDATA[`uname -a', along with any relevant error messages, and email it
+]]><![CDATA[as a question to the questions@FreeBSD.org mailing list.  If you are
+]]><![CDATA[unfamiliar with FreeBSD's directory layout, please refer to the hier(7)
+]]><![CDATA[man page.  If you are not familiar with man pages, type `man man'.
+]]><![CDATA[You may also use /stand/sysinstall to re-enter the installation and
+]]><![CDATA[configuration utility.  Edit /etc/motd to change this login announcement.
+]]></programlisting>
+
+    <para>Potrebbe essere opportuno rimuovere il file
+      <filename>/etc/motd</filename> originale, al successivo riavvio il sistema
+      provveder&agrave; automaticamente a sostituirlo ricompilandolo
+      automaticamente con le informazioni relative al sistema stesso:</para>
+
+    <programlisting>
+<![CDATA[FreeBSD 4.8-STABLE (MERLINO) #1: Thu Jul 17 19:10:46 CEST 2003
+]]></programlisting>
+
+    <para>Nel caso si intenda installare un sistema che consenta l'accesso e la
+      gestione remota via &man.telnet.1; o OpenSSH (Secure Shell) attraverso la
+      rete internet, &egrave; buona norma creare un banner di avviso che
+      sostituisca definitivamente il file <filename>/etc/motd</filename>.</para>
+
+    <para>Ora facciamo in modo di rimuovere definitivamente la genereazione
+      automatica del banner presente nel file <filename>/etc/motd</filename>.
+      Editiamo il file di configurazione <filename>/etc/rc.conf</filename> per
+      aggiungere la seguente riga di testo:</para>
+
+    <programlisting>
+<![CDATA[update_motd="NO"
+]]></programlisting>
+
+    <para>Ora creiamo ed installiamo un nuovo banner di avviso.</para>
+
+    <para>Utilizziamo l'editor &man.ee.1; oppure &man.vi.1; per rimpiazzare
+      l'attuale file <filename>/etc/motd</filename> con le seguenti linee di
+      testo, rammentiamo che pu&ograve; anche essere utilizzato un <quote>legal
+        disclaimer</quote> equivalente (il disclaimer &egrave; stato tratto
+      dall'interessante articolo <ulink
+        url="http://www.schlacter.net/public/FreeBSD-STABLE_and_IPFILTER.html">How
+        to Build a FreeBSD-STABLE Firewall with IPFILTER</ulink>).</para>
+
+    <programlisting>
+<![CDATA[* * * * * * * * * * * * W A R N I N G * * * * * * * * * * * * *
+]]><![CDATA[THIS SYSTEM IS RESTRICTED TO AUTHORIZED USERS FOR AUTHORIZED USE
+]]><![CDATA[ONLY. UNAUTHORIZED ACCESS IS STRICTLY PROHIBITED AND MAY BE
+]]><![CDATA[PUNISHABLE UNDER THE COMPUTER FRAUD AND ABUSE ACT OF 1986 OR
+]]><![CDATA[OTHER APPLICABLE LAWS. IF NOT AUTHORIZED TO ACCESS THIS SYSTEM,
+]]><![CDATA[DISCONNECT NOW. BY CONTINUING, YOU CONSENT TO YOUR KEYSTROKES
+]]><![CDATA[AND DATA CONTENT BEING MONITORED. ALL PERSONS ARE HEREBY
+]]><![CDATA[NOTIFIED THAT THE USE OF THIS SYSTEM CONSTITUTES CONSENT TO
+]]><![CDATA[MONITORING AND AUDITING.
+]]><![CDATA[* * * * * * * * * * * * W A R N I N G * * * * * * * * * * * * *
+]]></programlisting>
+
+    <para>Ora copiamo il banner di avviso nel file
+      <filename>/etc/issue</filename>.  In questo modo il banner di avviso
+      sar&agrave; visibile direttamente alla console prima che il prompt di
+      login sia disponibile.  Gli utenti saranno ora consapevoli del fatto che
+      tutte le loro operazioni verranno monitorate dal sistema a partire dal
+      momento in cui effettueranno il login.</para>
+
+    <screen>&prompt.root; <userinput>mv /etc/motd /etc/issue</userinput></screen>
+
+    <screen>&prompt.root; <userinput>touch /etc/COPYRIGHT</userinput></screen>
+
+    <para>Dopo aver inserito il banner potrebbe anche essere opportuno
+      modificare le informazioni sul copyright, la creazione di un file vuoto
+      <filename>/etc/COPYRIGHT</filename>, viene effettuata per non consentire
+      agli utenti di ottenere notizie a riguardo del Sistema Operativo
+      utilizzato.</para>
+  </sect1>
+
+  <sect1 id="freebsd-single-user">
+    <title>Processo di init, avviare il sistema in modalit&agrave; single
+      user</title>
+
+    <para>Una delle procedure molto importanti da tenere a mente per consentire
+      di gestire correttamente un Sistema Operativo &unix; &egrave; quella che,
+      in caso di necessit&agrave;, ci consentir&agrave; di avviare il Sistema
+      in modalit&agrave; <emphasis>single user</emphasis>.</para>
+
+    <para>Il processo di avviamento di un computer, qualunque sia il tipo di
+      architettura adottato, prende il nome di processo di avvio (cfr. <ulink
+        url="http://info.astrian.net/jargon/terms/b.html#boot">Jargon
+        file</ulink>), durante questo processo viene caricato ed eseguiuto
+      nella memoria del computer il Kernel del Sistema Operativo.  Prima che il
+      Sistema Operativo stesso venga avviato completamente si devono anche
+      verificare una serie di eventi che sono molto importanti, tra questi
+      possiamo senzadubbio citare il processo di mount dei file system ed il
+      contestuale avviamento dei demoni di sistema.</para>
+
+    <para>Tutti questi eventi vengono eseguiti da una serie di script che
+      prendono il nome di script di init del Sistema Operativo e compongono il
+      processo di init di Sistema.  FreeBSD esegue un solo script
+      all'avviamento del sistema, in particolare legge il file
+      <filename>/etc/rc</filename> che a sua volta richiama altri tre script:
+      si tratta dei file <filename>/etc/defaults/rc.conf</filename>,
+      <filename>/etc/rc.conf</filename> e
+      <filename>/etc/rc.conf.local</filename>.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><filename>/etc/defaults/rc.conf</filename> &egrave; il file che
+          elenca tutti i parametri di configurazione di FreeBSD, da non
+          modificare mai;</para>
+      </listitem>
+
+      <listitem>
+        <para><filename>/etc/rc.conf</filename> sovrascrive i parametri di
+          configurazione del file
+          <filename>/etc/defaults/rc.conf</filename>;</para>
+      </listitem>
+
+      <listitem>
+        <para><filename>/etc/rc.conf.local</filename> per quanto concerne le
+          configurazioni locali sovrascrive i parametri di configurazione del
+          file <filename>/etc/defaults/rc.conf</filename>.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Per finire questa piccola panoramica sull'avviamento di un sistema
+      FreeBSD, possiamo sicuramente dire che tutti i sistemi &unix;
+      generalmente prevedono almeno due tipi di avviamento.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>l'avviamento automatico che prevede l'avviamento ed il
+          caricamento del Kernel di sistema, individua e configura l'hardware,
+          crea i processi di sistema, esegue gli script di avviamento (init) e
+          procede con l'avviamento in multiutenza</para>
+      </listitem>
+
+      <listitem>
+        <para>l'avviamento manuale (modalit&agrave; single user) che
+          prevede l'avviamento ed il caricamento del Kernel di sistema,
+          individia e configura l'hardware, crea i processi i processi di
+          sistema e cede il controllo all'utente.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Quando si esegue il caricamento del Sistema Operativo in
+      modalit&agrave; single user, solitamente risulta montato il solo il
+      file system di root <filename>/</filename> ed in modalit&agrave; di sola
+      lettura.  Appare evidente l'impossibilit&agrave; di utilizzare qualsiasi
+      tipo di applicazione che, per funzionare, faccia ricorso alla scrittura
+      di file temporanei (un semplice editor di testi).  L'avviamento manuale
+      &egrave; molto spesso fondamentale nella risoluzione di problemi,
+      infatti ci consentir&agrave; di sistemare alcuni problemi che possono
+      apparire di difficile soluzione come quello di aver dimenticato la
+      password di <username>root</username> o di aver modificato in maniera
+      errata il file <filename>/etc/rc.conf</filename>.</para>
+
+    <para>Vediamo ora i comandi che consentono di gestire l'avviamento in
+      modalit&agrave; single user di un sistema FreeBSD.</para>
+
+    <screen>Hit [enter] to boot immediately, or any key for the command prompt
+Booting [kernel] in 9 seconds....
+A questo punto premere un qualsiasi tasto (tranne invio) e digitate</screen>
+
+    <screen>&prompt.root; <userinput>boot -s</userinput></screen>
+
+    <para>In questo modo il sistema verr&agrave; avviato in modalit&agrave;
+      single user, e vi verr&agrave; richiesto il percorso completo di una shell
+      (<filename>/usr/local/bin/bash</filename>, se avete installato la
+      &man.bash.1;), se si desidera utilizzare la shell di default
+      (<filename>/bin/sh</filename>) sar&agrave; sufficente confermare con il
+      tasto <keycap>Invio</keycap>.</para>
+
+    <screen>&prompt.root; <userinput>mount -u /</userinput></screen>
+
+    <para>Monta la partizione di root in modalit&agrave; lettura e
+      scrittura.</para>
+
+    <screen>&prompt.root; <userinput>mount -a</userinput></screen>
+
+    <para>Nel caso dovesse essere necessario, questo comando monta tutti gli
+      altri file system leggendo il file
+      <filename>/etc/fstab.</filename>.</para>
+
+    <para>Per ripristinare la password di <username>root</username> seguite
+      le istruzioni presenti nelle <ulink
+        url="http://www.freebsd.org/doc/en_US.ISO8859-1/books/faq/admin.html#FORGOT-ROOT-PW">FAQ
+        di FreeBSD</ulink></para>
+  </sect1>
+
+  <sect1 id="freebsd-rc.conf-reload">
+    <title>Ricaricare il file <filename>/etc/rc</filename> senza riavviare il
+      sistema</title>
+
+    <para>A volte pu&ograve; succedere di modificare il file di configurazione
+      principale di FreeBSD <filename>/etc/rc</filename>, se si intende far
+      ripartire la macchina senza eseguire un reboot completo, si consiglia di
+      seguire la seguente procedura:</para>
+
+    <screen>&prompt.root; <userinput>shutdown now</userinput></screen>
+
+    <para>Il sistema a questo punto ci proporr&agrave; di scegliere il tipo di
+      shell da utilizzare per lavorare in modalit&agrave; single user,
+      selezioneremo la nosta shell preferita o battiamo il tasto
+      <keycap>Invio</keycap>, dopo aver avuto accesso al sistema
+      digitiamo:</para>
+
+    <screen>&prompt.root; <userinput>exit</userinput></screen>
+
+    <para>Il sistema eseguir&agrave; la rilettura di tutti i file di init
+      tenendo conto delle modifiche apportare al file
+      <filename>/etc/rc.conf</filename>.</para>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

@@ -1,0 +1,385 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="activities">
+  <title>Programmare le attivit&agrave;</title>
+
+  <sect1 id="activities-syslog">
+    <title>La generazione dei log: il demone syslogd</title>
+
+    <para>&man.syslogd.8; &egrave; il sistema che consente di gestire la
+      generazione dei file di log per le macchine &unix;, in particolare questo
+      prodotto consente di gestire i vari messaggi provenienti dal kernel del
+      sistema nonch&egrave; quelli provenienti da molte altre applicazioni che
+      fanno parte del sistema operativo.  Nei sistemi FreeBSD, Il demone che
+      gestisce la generazione dei log di sistema prende il nome di
+      <application>syslogd</application> ed il suo file di configurazione
+      &egrave; <filename>/etc/syslog.conf</filename>.
+    </para>
+
+    <programlisting>*.err;kern.debug;auth.notice;mail.crit          /dev/console
+*.notice;kern.debug;lpr.info;mail.crit;news.err /var/log/messages
+mail.info                                       /var/log/maillog</programlisting>
+
+    <para>queste linee, che sono contenute nel file di configurazione
+      <filename>/etc/syslog.conf</filename>, consentono di redirigere i
+      messaggi e le informazioni direttamente in console oppure direttamente
+      verso file di log specifici.</para>
+
+    <programlisting>facility.livello                         attivit&agrave;</programlisting>
+
+    <para>In particolare, il file di configurazione di &man.syslogd.8;, tiene
+      conto di un campo <emphasis>selettore</emphasis> e di un campo
+      <emphasis>attivit&agrave;</emphasis>.  I <emphasis>selettori</emphasis>
+      contengono le <emphasis>facility</emphasis>, ogni
+      <emphasis>facility</emphasis> ha un suo livello di gravit&agrave;,
+      l'attivit&agrave; sar&agrave; quella di ridirigere l'output delle
+      informazioni o verso la console o verso un file di testo.  Per maggiori
+      informazioni sulle facility standard consultare la pagina man di
+      &man.newsyslog.conf.5;.  &os; dispone di una versione di
+      <application>syslogd</application> che consente anche di selezionare i
+      messaggi identificando il programma che li ha generati.</para>
+
+    <programlisting>!startslip
+*.*                                             /var/log/slip.log
+!ppp
+*.*                                             /var/log/ppp.log</programlisting>
+
+    <para>In questo caso tutti i messaggi provenienti dal demone &man.ppp.8;
+      verranno rediretti verso il file <filename>/var/log/ppp.log</filename>,
+      se vengono definiti dei nuovi selettori la cui attivit&agrave; &egrave;
+      scrivere un file di log, &egrave; necessario che il file stesso venga
+      precedentemente creato (comando &man.touch.1;).</para>
+  </sect1>
+
+  <sect1 id="activities-newsyslog">
+    <title>La gestione dei log: newsyslog</title>
+
+    <para>Per un amministratore di sistema &egrave; di fondamentale importanza
+      capire cosa accade sui sistemi che amministra.  Una corretta gestione dei
+      file di log pu&ograve; essere fondamentale perch&egrave; consente di
+      disporre, in maniera strutturata ed intelligente, di tutte quelle
+      informazioni che possono aiutare un'amministratore a prevenire eventuali
+      problemi nonch&egrave; a mantenere in sicurezza il sistema.
+      &man.newsyslog.8; &egrave; una utility di sistema che consente di
+      mantenere i log di sistema aiutando, se necessario, l'amministratore a
+      definire un sistema di archiviazione periodica automatica.</para>
+
+    <para>I file di log dovrebbero occupare uno spazio adeguato su disco
+      nonch&egrave; essere mantenuti in un formato sempre leggibile, questo
+      modo di operare consente di mantenere i file di log sempre in ordine e
+      pronti per essere interpretati dalle svariate utility disegnate per
+      generare report intellegibili.  &man.newsyslog.8; consente di impostare
+      alcune variabili che aiuteranno l'amministratore di sistema a ruotare ed
+      archiviare in maniera strutturata e definitiva i file di log prodotti
+      dalle varie applicazioni.  Le impostazioni possono essere definite
+      utilizzando il file <filename>/etc/newsyslog.conf</filename>.</para>
+
+    <programlisting># configuration file for newsyslog
+# logfilename          [owner:group]          mode count size when [ZJB] [/pid_file] [sig_num]
+/var/log/maillog                              640  7       *    $W0D0 Z
+/var/log/messages                             644  5       100  *     Z
+/var/log/www.sitoweb.net-access_log           644  2       *    $M1D4   Z    /var/run/httpd.pid
+/var/log/www.sitoweb.net-error_log            644  2       *    $M1D4   Z    /var/run/httpd.pid</programlisting>
+
+    <para>Le impostazioni di default del file di configurazione
+      <filename>/etc/newsyslog.conf</filename> sono decisamente sufficenti per
+      ruotare e gestire quasi tutti i file di log.  Nell'esempio sopracitato
+      vediamo come archiviare i file di log del mailserver
+      (<filename>maillog</filename>), il file di log del kernel
+      (<filename>messages</filename>) ed i file di log prodotti dal server web
+      <application>Apache</application>.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><literal>logfile_name</literal> &egrave; il nome del file di log
+          che dovr&agrave; essere archiviato;</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>owner:group</literal> &egrave; un'impostazione opzionale
+          che definisce l'utente ed il gruppo proprietario del file che
+          dovr&agrave; essere archiviato;</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>mode</literal> specifica il file mode del log;</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>count</literal> specifica il numero dei file che dovranno
+          essere archiviati.</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>size</literal> &egrave; un'impostazione che definisce la
+          grandezza massima che un file di log pu&ograve; raggiungere (espressa
+          in kilobyte) prima di essere ruotato, quando questo campo viene
+          completato con un asterisco <quote>*</quote> non verranno considerate
+          un limite alla ruotazione le dimensioni del file di log;</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>when</literal> &egrave; un'impostazione che definisce
+          un'intervallo temporale, quando il campo viene completato con
+          un'asterisco <quote>*</quote> la rotazione dei log rotation
+          dipender&agrave; unicamente dal valore impostato nel campo
+          <literal>size</literal>, di seguito riportiamo gli esempi che ci
+          consentiranno di gestire al meglio il campo
+          <literal>when</literal>;</para>
+      </listitem>
+    </itemizedlist>
+
+    <programlisting>$D0 ruota il log ogni notte a mezzanotte (lo stesso per @T00)
+$D23 ruota il log ogni giorno alle ore 23:00 (lo stesso per @T23)
+$W0D23 ruota il log ogni Domenica alle ore 23:00
+$W5D16 ruota il log ogni Venerdì alle ore 16:00
+$M1D0 ruota il log il primo giorno di ogni mese a mezzanotte (lo stesso per @01T00)
+$M5D6 ruota il log ogni giorno 5 del mese alle ore 6:00 (lo stesso per @05T06)</programlisting>
+
+    <itemizedlist>
+      <listitem>
+        <para><literal>flags</literal> &egrave; un'impostazione che specifica il
+          modo di processare i file di log;</para>
+      </listitem>
+
+      <listitem>
+        <para><literal>path_to_pid_file</literal> &egrave; un'impostazione
+          opzionale che consente di indicare il file che contiene il
+          <literal>process id</literal> del demone attivo che st&agrave;
+          generando il file di log.  Se questo campo &egrave; presente viene
+          inviato un <literal>signal_number</literal> al
+          <literal>process id</literal>.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>L'esempio che abbiamo riportato nel nostro file
+      <filename>/etc/newsyslog.conf</filename>, consente di riavviare il
+      server <application>Apache</application> nel momento in cui
+      &man.newsyslog.8; effettuar&agrave; la ruotazione mensile del file di
+      log.</para>
+  </sect1>
+
+  <sect1 id="activities-cron">
+    <title>Introduzione al cron</title>
+
+    <para>Prima di iniziare a trattare di alcune applicazioni pi&ugrave;
+      importanti che potremmo utilizzare con un server FreeBSD, &egrave;
+      fondamentale disporre di un sistema altamente programmabile e
+      configurabile che ci consenta di pianificare tutti gli aggiornamenti e
+      di ottenere via email tutti i report delle attivit&agrave; svolte
+      automaticamente dal sistema.  Potrebbe essere un'ottima idea programmare
+      l'aggiornamento automatico dei ports, dei sorgenti e della
+      documentazione di cui abbiamo gi&agrave; parlato piuttosto
+      approfonditamente.</para>
+
+    <para>Il demone &man.cron.8; e gli script periodici ci aiuteranno a
+      svolgere questo tipo di attivit&agrave;, il &man.cron.8; viene avviato
+      con il processo di boot di FreeBSD e continua a girare in background.
+      &man.cron.8; verifica ogni minuto la tabella di &man.crontab.5; ed esegue
+      i comandi e gli script che sono stati installati di default con il sistema
+      operativo nonch&egrave; tutti quei comandi e quegli script che abbiamo
+      realizzato per eseguire le diverse attivit&agrave; di sistema.</para>
+  </sect1>
+
+  <sect1 id="activities-crontab">
+    <title>La tabella di crontab</title>
+
+    <para>La tabella di &man.crontab.5; viene memorizzata nel file
+      <filename>/etc/crontab</filename> ed il suo mantenimento &egrave;
+      fondamentale alla vita del nostro sistema, di seguito vediamo la tabella
+      che viene installata come default au &os;:</para>
+
+    <programlisting># /etc/crontab - root's crontab for FreeBSD
+#
+# $FreeBSD: src/etc/crontab,v 1.21.2.3 2000/12/08 10:56:07 obrien Exp $
+#
+SHELL=/bin/sh
+PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
+HOME=/var/log
+#
+#minute hour    mday    month   wday    who     command
+#
+*/5     *       *       *       *       root    /usr/libexec/atrun
+#
+# rotate log files every hour, if necessary
+0       *       *       *       *       root    newsyslog
+#
+# do daily/weekly/monthly maintenance
+1       3       *       *       *       root    periodic daily
+15      4       *       *       6       root    periodic weekly
+30      5       1       *       *       root    periodic monthly
+#</programlisting>
+
+    <para>Per utilizzare al meglio e programmare dunque il nostro sistema ad
+      eseguire automaticamente le attivit&agrave; di aggiornamento e
+      mantenimento, analizziamo nel dettaglio i campi che consentono di
+      programmare la tabella di &man.crontab.1;:</para>
+
+    <informaltable>
+      <tgroup cols="3" colsep="1" rowsep="1">
+        <colspec colname="col0" align="center">
+
+        <colspec colname="col1" align="center">
+
+        <colspec colname="col2" align="left">
+
+        <tbody>
+          <row>
+            <entry>minute</entry>
+
+            <entry>0-59</entry>
+
+            <entry>il valore pu&ograve; essere rappresentato da un numero fisso
+              o pu&ograve; essere impostato un range;</entry>
+          </row>
+
+          <row>
+            <entry>hour</entry>
+
+            <entry>0-23</entry>
+
+            <entry>si imposta l'ora nella quale viene programmato il
+              job;</entry>
+          </row>
+
+          <row>
+            <entry>mday</entry>
+
+            <entry>1-31</entry>
+
+            <entry>in questo campo &egrave; possibile impostare il valore
+              <quote>1,15,30</quote> per impostare l'esecuzione del job ogni
+              1°, 15° e 30° giorno del mese;</entry>
+          </row>
+
+          <row>
+            <entry>month</entry>
+
+            <entry>1-12</entry>
+
+            <entry>in questo campo &egrave; possibile impostare il valore
+              <quote>*/2</quote> per definire l'esecuzione del job ogni 2
+              mesi;</entry>
+          </row>
+
+          <row>
+            <entry>wday</entry>
+
+            <entry>0-7</entry>
+
+            <entry>in questo campo il valore <quote>0</quote> significa ogni
+              giorno, il valore <quote>1</quote> indica l'esecuzione del job
+              ogni luned&igrave;, il valore <quote>7</quote> indica l'esecuzione
+              del job ogni domenica;</entry>
+          </row>
+
+          <row>
+            <entry>who</entry>
+
+            <entry>user</entry>
+
+            <entry>si tratta dell'utente di sistema che esegue lo script,
+              genericamente viene utilizzato l'utente
+              <username>root</username>.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>La wildcard <quote>*</quote> viene interpretata come un valore
+      qualsiasi, per eseguire un comando ogni mese nel campo rispettivo si
+      inserir&agrave; <quote>*</quote>, gli script delle procedure periodice
+      vengono memorizzati nella directory
+      <filename>/etc/periodic</filename>.</para>
+
+    <screen>&prompt.root; <userinput>ls /etc/periodic/</userinput>
+total 14
+drwxr-xr-x   7 root  wheel   512 Aug 21 23:24 ./
+drwxr-xr-x  16 root  wheel  2048 Aug 29 20:32 ../
+drwxr-xr-x   2 root  wheel   512 Aug 30 12:13 altre/
+drwxr-xr-x   2 root  wheel  1024 Aug 27 15:43 daily/
+drwxr-xr-x   2 root  wheel   512 Aug 25 18:32 monthly/
+drwxr-xr-x   2 root  wheel   512 Jun  9 12:01 security/
+drwxr-xr-x   2 root  wheel   512 Jun 16 15:27 weekly/</screen>
+
+    <para>Nell'esempio che abbiamo riportato sopra possiamo vedere il contenuto
+      della directory <filename>/etc/periodic</filename> laddove &egrave; stata
+      inserita una nuova cartella  <filename>/etc/periodic/altre</filename>
+      nella quale verranno memorizzati tutti gli script periodici che non
+      possono essere classificati nella categoria delle procedure periodiche
+      standard.</para>
+
+    <para>Esistono alcuni settaggi standard che si possono usare nella tabella
+      del &man.cron.8;:</para>
+
+    <informaltable>
+      <tgroup cols="2" colsep="1" rowsep="1">
+        <colspec colname="col0" align="center">
+
+        <colspec colname="col1" align="left">
+
+        <tbody>
+          <row>
+            <entry>@reboot</entry>
+
+            <entry>ad ogni riavvio del sistema;</entry>
+          </row>
+
+          <row>
+            <entry>@yearly</entry>
+
+            <entry>ogni anno - sostituisce il valore 0 0 1 1 *;</entry>
+          </row>
+
+          <row>
+            <entry>@annually</entry>
+
+            <entry>come @yearly;</entry>
+          </row>
+
+          <row>
+            <entry>@monthly</entry>
+
+            <entry>ogni mese - sostituisce il valore 0 0 1 * *;</entry>
+          </row>
+        
+          <row>
+            <entry>@weekly</entry>
+          
+            <entry>ogni settimana - sostituisce il valore 0 0 * * 0;</entry>
+          </row>
+        
+          <row>
+            <entry>@daily</entry>
+          
+            <entry>ogni giorno - sostituisce il valore 0 0 * * *;</entry>
+          </row>
+        
+          <row>
+            <entry>@midnight</entry>
+
+            <entry>come @daily;</entry>
+          </row>
+
+          <row>
+            <entry>@hourly</entry>
+
+            <entry>ogni ora - sostituisce il valore 0 * * * *;</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

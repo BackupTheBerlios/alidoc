@@ -1,0 +1,547 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="ports">
+  <title>L'albero dei port di FreeBSD</title>
+
+  <sect1 id="ports-preface">
+    <title>Preambolo</title>
+
+    <para>FreeBSD dispone di un'eccellente sistema di gestione dei package e
+      dei port.  I packages sono dei pacchetti software precompilati
+      generalmente disponibili sul sito ftp del progetto FreeBSD, mentre i
+      port devono essere compilati ed installati sul proprio sistema partendo
+      dal codice sorgente che, tramite il sistema <emphasis>Make</emphasis>,
+      viene prelevato dai rispettivi siti di origine.  I port ed i package
+      popolano un database nel quale sono contenute tutte le informazioni
+      relative ai software installati sul sistema.</para>
+  </sect1>
+
+  <sect1 id="ports-package">
+    <title>I package</title>
+
+    <para>Per gestire i package possiamo ricorrere a diverse utility, il
+      programma &man.pkg.add.1; &egrave; necessario per installare i
+      pacchetti precompilati, l'installazione pu&ograve; avvenire sia dal
+      disco locale che direttamente dalla rete:</para>
+
+    <screen>&prompt.root; <userinput>pkg_add lsof-4.56.4.tgz</userinput></screen>
+
+    <para>L'utility &man.pkg.info.1; &egrave; una utility che serve per
+      visualizzare una lista che descrive i vari package installati nel
+      sistema:</para>
+
+    <screen>&prompt.root; <userinput>pkg_info</userinput>
+Hermes-1.3.3        Fast pixel formats conversion library
+ORBit-0.5.17        High-performance CORBA ORB with support for the C language
+OpenSP-1.5_2        This package is a collection of SGML/XML tools called OpenS</screen>
+
+    <para>Elenchiamo altre possibili opzioni per l'utility
+      &man.pkg.info.1;:</para>
+
+    <programlisting>
+<![CDATA[pkg_info -L apache* # mostra i file che compongono un package
+]]><![CDATA[pkg_info -s apache* # mostra le dimensioni del package
+]]><![CDATA[pkg_info -R apache* # mostra le dipendenze del package
+]]></programlisting>
+
+    <para>L'utility &man.pkg.version.1; &egrave; un programma che visualizza
+      le versioni dei package installati nel sistema, e lo fa comparando le
+      versioni dei package con quelle disponibili nell'albero dei port e
+      pu&ograve; essere utilizzata per determinare gli aggiornamenti da
+      eseguire:</para>
+
+    <screen>&prompt.root; <userinput>pkg_version -vL\=</userinput>
+XFree86-clients-4.3.0_2             <   needs updating (port has 4.3.0_3)</screen>
+
+    <para>Elenchiamo il significato delle opzioni offerte dall'utility
+      &man.pkg.version.1;:</para>
+
+    <programlisting>
+<![CDATA[=       La versione del pacchetto installato deve comparare con una nell'albero dei ports
+]]><![CDATA[<       La versione installata è più vecchia di quella disponibile nell'albero dei ports
+]]><![CDATA[>       La versione installata è più nuova di quella disponibile nell'albero dei ports
+]]><![CDATA[?       Il package installato può anche non essere trovato nell'indice dei ports
+]]><![CDATA[*       Ci sono versioni multiple del pacchetto
+]]><![CDATA[-L      Limita l'output a quei pacchetti il cui stato del flag non compara
+]]><![CDATA[-v      Enable verbose output
+]]></programlisting>
+
+    <para>Per rimuovere una precedente installazione di un package utilizziamo
+      l'utility &man.pkg.delete.1;:</para>
+
+    <screen>&prompt.root; <userinput>pkg_delete xchat-1.7.1</userinput></screen>
+  </sect1>
+
+  <sect1 id="ports-ports">
+    <title>I port</title>
+
+    <para>L'albero dei port si compone principalmente di un'insieme di
+      <emphasis>makefile</emphasis>.  Si tratta del sistema di gestione
+      delle applicazioni di FreeBSD che viene comunemente utilizzato nei
+      sistemi BSD e che si compone di vari file di <emphasis>make</emphasis>
+      che consentono all'utente finale di compilare ed installare le
+      applicazioni fornite da terze parti.</para>
+
+    <para>L'albero dei port di un sistema FreeBSD &egrave; posizionato nella
+      directory <filename>/usr/ports</filename>, all'interno di questa
+      directory troviamo diverse sottodirectory che, a loro volta, contengono
+      e suddividono i port di sistema in categorie, le categorie, a loro
+      volta, si suddividono in tipologie di software.</para>
+
+    <para>La struttura dei port viene installata su richiesta dalla procedura
+      di installazione del sistema operativo (&man.sysinstall.8;) e questa
+      pu&ograve; essere sincronizzata con l'albero dei ports di origine
+      presente sui server CVS del progetto FreeBSD.</para>
+
+    <para>Per i dettagli e specifiche ufficiali il solo ed unico riferimento
+      rimane il <ulink
+        url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/ports.html">manuale di FreeBSD</ulink>.</para>
+  </sect1>
+
+  <sect1 id="ports-update">
+    <title>Mantenere aggiornato l'albero dei port</title>
+
+    <para>Abbiamo accennato in precedenza che la struttura dell'albero dei
+      port viene normalmente memorizzata sul disco locale del nostro sistema,
+      l'albero si compone di un'insieme di file di testo
+      (<emphasis>Makefile</emphasis>).  Questi file contengono principalmente
+      le informazioni necessarie alla compilazione e alla installazione delle
+      applicazioni.  Sar&agrave; nostro interesse mantenere la struttura
+      dell'intero albero sincronizzata con i server del progetto
+      FreeBSD.</para>
+
+    <para>Per consentire la sincronizzazione dell'albero dei port dovremo
+      installare l'applicazione <application>CVSsup</application>, si
+      pu&ograve; procedere tranquillamente all'installazione dell'applicativo
+      utilizzando il programma di installazione &man.sysinstall.8; nelle
+      modalit&agrave; che abbiamo gi&agrave; trattato nei capitoli precedenti,
+      oppure &egrave; possibile compilare ed installare l'utility
+      <application>CVSsup</application> direttamente dall'albero dei
+      port:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/net/cvsup-without-gui</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make install clean</userinput></screen>
+
+    <para>Dopo aver installato <application>CVSsup</application> possiamo
+      procedere con la pianificazione dell'aggiornamento dell'albero dei
+      port, la prima attivit&agrave; da portare a termine sar&agrave; quella
+      di creare i file di configurazione necessari a &man.cvsup.1; per
+      eseguire la sincronizzazione.  Per preparare questi file potremmo
+      utilizzare gli esempi che sono stati memorizzati sul disco locale al
+      momento dell'installazione del sistema operativo.  A tale scopo
+      potremmo utilizzare il file
+      <filename>/usr/share/examples/cvsup/ports-supfile</filename>.</para>
+
+    <para>A questo punto, utilizzando l'area disco nella quale vengono
+      memorizzati i file di configurazione delle applicazioni locali
+      (<filename>/usr/local/etc</filename>), potremmo creare una nuova
+      directory che ci consentir&agrave;, anche per il futuro, di
+      identificare al meglio questo tipo di file:</para>
+
+    <screen>&prompt.root; <userinput>mkdir /usr/local/etc/cvsup</userinput></screen>
+
+    <para>Ora copiamo il file <filename>ports-supfile</filename> di esempio
+      nella directory <filename>/usr/local/etc/cvsup</filename>:</para>
+
+    <screen>&prompt.root; <userinput>cp /usr/share/examples/cvsup/ports-supfile /usr/local/etc/cvsup</userinput></screen>
+
+    <para>Vediamo ora un esempio con un file di configurazione; questo file di
+      esempio potr&agrave; essere utilizzato per mantenere aggiornato il
+      nostro albero dei port:</para>
+
+      <programlisting>
+<![CDATA[# Defaults that apply to all the collections
+]]><![CDATA[#
+]]><![CDATA[*default host=cvsup.sm.FreeBSD.org
+]]><![CDATA[*default base=/usr
+]]><![CDATA[*default prefix=/usr
+]]><![CDATA[*default release=cvs tag=.
+]]><![CDATA[*default delete use-rel-suffix
+]]><![CDATA[# If your network link is a T1 or faster, comment out the following line.
+]]><![CDATA[*default compress
+]]><![CDATA[## Ports Collection.
+]]><![CDATA[#
+]]><![CDATA[# The easiest way to get the ports tree is to use the "ports-all"
+]]><![CDATA[# mega-collection. It includes all of the individual "ports-*"
+]]><![CDATA[# collections,
+]]><![CDATA[ports-all
+]]></programlisting>
+
+    <para>Per aggiornare l'albero dei port sar&agrave; sufficente digitare il
+      seguente comando:</para>
+
+    <screen>&prompt.root; <userinput>cvsup -g -L 2 /usr/local/etc/cvsup/ports-supfile</userinput></screen>
+
+    <para>Nel caso specifico, per automatizzare la procedura di aggiornamento
+      dei port e disporre di un albero sempre sincronizzato con i server del
+      progetto FreeBSD, &egrave; consigliabile creare uno script che
+      potr&agrave; essere riutilizzato successivamente con le procedure
+      periodiche (<filename>/etc/periodic/weekly</filename>)</para>
+
+    <programlisting>
+<![CDATA[#!/usr/local/bin/bash
+]]><![CDATA[# automatizza l'aggiornamento dell'albero dei ports
+]]><![CDATA[# script by djspider8
+]]><![CDATA[/usr/local/bin/cvsup -g -L 2 /usr/local/etc/cvsup/ports-supfile
+]]><![CDATA[# tiene pulita la base dati dei ports
+]]><![CDATA[/usr/local/sbin/portsdb -uU # richiede il port portupgrade!!
+]]><![CDATA[#
+]]><![CDATA[# EOF - DjSpider8
+]]></programlisting>
+  </sect1>
+
+  <sect1 id="ports-install">
+    <title>Installare un port</title>
+
+    <para>A questo punto possiamo finalmente installare tutto il software che
+      necessita al nostro sistema o che maggiormente ci interessa, in
+      precedenza abbiamo gi&agrave; analizzato un piccolo esempio di
+      installazione avendo proceduto con l'installazione di
+      <application>CVSsup</application>, in questo paragrafo cercheremo
+      di approfondire le modalit&agrave; di utilizzo.</para>
+
+    <para>Per selezionare un port sar&agrave; sufficente scorrere il contenuto
+      della directory <filename>/usr/ports</filename>, per ricercare un
+      programma nell'albero dei port possiamo ricorrere al comando
+      &man.make.1;:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make search key=apache13</userinput></screen>
+
+    <para>L'albero dei port viene aggiornato continuamente e molto spesso non
+      viene sincronizzato l'indice dell'albero, per sistemare l'indice
+      dovremo digitare il seguente comando:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make index</userinput>
+Generating INDEX - please wait..</screen>
+
+    <para>Questa operazione &egrave; sconsigliata nel caso si disponga di un
+      sistema particolarmente lento.  Per effettuare delle ricerche e reperire
+      uno specifico port &egrave; anche possibile ricorrere al motore di
+      ricerca presente sul sito del progetto FreeBSD alla URL <ulink
+        url="http://www.freebsd.org/ports/">http://www.freebsd.org/ports/</ulink>
+      oppure &egrave; possibile consultare il progetto FreshPorts alla URL
+      <ulink
+        url="http://www.freshports.org/">http://www.freshports.org/</ulink>.</para>
+
+    <para>Prendiamo ora in considerazione un esempio pratico con il quale
+      sar&agrave; possibile approfondire ed utilizzare al meglio la
+      procedura di compilazione e di installazione di un nuovo port in un
+      sistema FreeBSD.  Compiliamo ed installiamo il web server <ulink
+        url="http://httpd.apache.org">Apache</ulink>, in questo esempio
+      faremo in modo di creare un package che potr&agrave; essere
+      riutilizzato anche su altre macchine, al termine della procedura di
+      compilazione e di installazione del ports ci preoccuperemo anche di
+      eseguire la pulizia dei files di appoggio, di seguito un riepilogo dei
+      comandi necessari:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/www/apache13</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make install</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make package</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make clean</userinput></screen>
+
+    <para>Il comando <command>make install</command> provvede a compilare ed
+      installare il software aggiornando il database dei package, non
+      dimentichiamo che tutto il software installato su FreeBSD con il
+      sistema dei package e dei port viene registrato nel database dei
+      package.</para>
+
+    <para>Il comando <command>make package</command> crea un pacchetto
+      software autoinstallante che potr&agrave; essere utilizzato anche su
+      altri sistemi FreeBSD grazie al comando
+      <command>pkg_add nomedelpacchetto.tbz.</command>.</para>
+
+    <para>Il comando <command>make clean</command> ripulisce la directory che
+      &egrave; stata automaticamente generata dallo script
+      <emphasis>Makefile</emphasis> per consentire la compilazione
+      dell'applicazione sul sistema.</para>
+
+    <para>Se necessita ricercare un particolare port &egrave; bene consultare
+      la seguente URL <ulink
+        url="http://www.freebsd.org/ports/">http://www.freebsd.org/ports/</ulink>.</para>
+  </sect1>
+
+  <sect1 id="ports-delete">
+    <title>Rimuovere un port</title>
+
+    <para>Prendendo spunto dall'esempio precendente, con il quale abbiamo
+      installato il web server Apache, la prima cosa che dobbiamo fare per
+      rimuovere il port &egrave; posizionarci nella directory del port stesso
+      (<filename>/usr/ports/www/apache13</filename>) e disinstallarlo
+      utilizzando il comando <command>make deinstall</command>:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/www/apache13</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make deinstall</userinput>
+===>  Deinstalling for Apache</screen>
+
+    <para>Abbiamo anche la possibilit&agrave; di installare nuovamente il
+      port che abbiamo appena rimosso dal sistema grazie al comando
+      <command>make reinstall</command>:</para>
+
+    <screen>&prompt.root; <userinput>make reinstall</userinput></screen>
+  </sect1>
+
+  <sect1 id="ports-package-remove">
+    <title>Rimuovere un package</title>
+
+    <para>Per rimuovere un package dal sistema dovremmo utilizzare il comando
+      &man.pkg.delete.1;, prima di procedere in tal senso, avremo la
+      necessit&agrave; di utilizzare il comando &man.pkg.info.1;.  Come abbiamo
+      visto in precedenza, questo comando ci consentir&agrave; di interrogare
+      il database dei package e verificare i pacchetti installati nel nostro
+      sistema, riprendiamo ancora una volta l'esempio precedente per
+      interrogare il package di apache:</para>
+
+    <screen>&prompt.root; <userinput>pkg_info apache*</userinput>
+Information for apache-1.3.27_4:
+Comment: The extremely popular Apache http server. Very fast, very clean
+Description:Apache is an HTTP server designed as a plug-in replacement for the
+NCSA server version 1.3 (or 1.4). It fixes numerous bugs in the NCSA server and
+includes many frequently requested new features, and has an API which allows it
+to be extended to meet users' needs more easily.</screen>
+
+    <para>A questo punto procediamo con la rimozione del package:</para>
+
+    <screen>&prompt.root; <userinput>pkg_delete apache-1.3.27_4</userinput></screen>
+
+    <para>Come abbiamo anche accennato in precedenza, i package installati su
+      un sistema FreeBSD vengono memorizzati in un database, il sistema dei
+      package si occupa anche di risolvere le dipendenze tra pacchetti.</para>
+
+    <para>L'installazione di un package o di un port risolvono anche tutte le
+      eventuali dipendenze, se necessario verranno contestualmente installati
+      tutti i package richiesti dal pacchetto, otterremo dunque l'installazione
+      di tutti port o di tutti i package dipendenti.  I port ed i package
+      popolano il database dei pacchetti, in questa base dati vengono
+      memorizzate tutte le applicazioni installate sul nostro sistema con le
+      relative dipendenze.</para>
+  </sect1>
+
+  <sect1 id="port-portupgrade">
+    <title>Aggiornare un package, utilizzare portupgrade</title>
+
+    <para>Abitualmente &egrave; sempre una buona idea rimuovere le vecchie
+      versioni del software utilizzando uno dei metodi che abbiamo descritto in
+      precedenza, ma, nei casi in cui si dispone di macchine in produzione come
+      i server internet, non &egrave; sempre possibile disinstallare un
+      package o rimuovere un port.  FreeBSD, tra i diversi port di cui dispone,
+      include anche una applicazione denomintata
+      <application>portupgrade</application>.</para>
+
+    <para><application>Portupgrade</application> &egrave; una utility di
+      sistema che consente di tenere aggiornati all'ultima versione tutti
+      port installati sul sistema, procediamo ora con l'installazione di
+      <application>portupgrade</application> digitando il seguente
+      comando:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/ports/sysutils/portupgrade/</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make install distclean</userinput></screen>
+
+    <para>La sintassi del comando &man.portupgrade.1; &egrave; simile alla
+      seguente:</para>
+
+    <screen>&prompt.root; <userinput>portupgrade [<replaceable>-opzione</replaceable>] [<replaceable>nome_del_pacchetto_da_aggiornare</replaceable>]</userinput></screen>
+
+    <para>Di seguito elenchiamo le varie opzioni a linea di comado per il
+      comando &man.portupgrade.1;:</para>
+
+    <programlisting>
+<![CDATA[-a / --all               aggiorna tutti i pacchetti installati
+]]><![CDATA[-h / --help              visualizza l'aiuto in linea
+]]><![CDATA[-f / --force             forza l'aggiornamento di un pacchetto
+]]><![CDATA[-F / --fetch-only        scarica solo i file della distribuzione
+]]><![CDATA[-i / --interactive       prima di aggiornare chiede la conferma
+]]><![CDATA[-p / --use-packages      utilizza i packages non i ports
+]]><![CDATA[-PP/ --use-packages-only usa solo i packages
+]]><![CDATA[-r / --recursive         aggiorna anche i pacchetti dipendenti
+]]><![CDATA[-R / --upward-recursive
+]]></programlisting>
+
+    <para>Vediamo ora come aggiornare un pacchetto presente sul sistema:</para>
+
+    <screen>&prompt.root; <userinput>portupgrade ipcalc</userinput></screen>
+
+    <para><application>Portupgrade</application> esegue la compilazione del
+      nuovo package, in caso di errore completa il backup della vecchia
+      versione, se tutto procede come previsto, disinstalla la vecchia versione
+      del pacchetto ed installa la nuova, aggiorna il database dei package e,
+      per finire, effettua la procedura del <command>make
+        clean</command>.</para>
+
+    <para>Attenzione, <application>portupgrade</application> basa le sue scelte
+      sul database dei package che contiene tutte le informazioni relative ai
+      pacchetti e alle varie dipendenze tra pacchetti, quindi, prima di
+      utilizzare l'utility &man.portupgrade.1; &egrave; buona norma ripulire il
+      database dei package da eventuali errori utilizzando il seguente
+      comando:</para>
+
+    <screen>&prompt.root; <userinput>pkgdb -F</userinput></screen>
+
+    <para>Eseguendo il comando <command>pkgdb -F</command> avremo la
+      possibilit&agrave; di riparare in maniera interattiva il database dei
+      package.  Un altro utilizzo dell'utility di &man.portupgrade.1;
+      &egrave;:</para>
+
+    <screen>&prompt.root; <userinput>portupgrade -FPPR <replaceable>nome_del_pacchetto</replaceable></userinput></screen>
+
+    <para>oppure:</para>
+
+    <screen>&prompt.root; <userinput>portupgrade --all</userinput></screen>
+
+    <para>L'opzione <option>--all</option> ci dar&agrave; la possibilit&agrave;
+      di aggiornare tutti i port installati sul sistema.  Per consentire
+      un'aggiornamento <quote>controllato</quote> dei port installati in un
+      sistema in produzione &egrave; consigliabile utilizzare il comando:</para>
+
+    <screen>&prompt.root; <userinput>portupgrade --all -i</userinput></screen>
+
+    <para>Come abbiamo visto in precedenza, l'opzione <option>-i</option>
+      consente di verificare in maniera interattiva i port da aggiornate.  Nel
+      caso si dovesse ricorre con frequenza all'utilizzo del comando
+      &man.portupgrade.1; &egrave; sempre una buona norma mantenere il database
+      dei port aggiornato grazie al comando:</para>
+
+    <screen>&prompt.root; <userinput>portsdb -uU</userinput></screen>
+
+    <para>La prima volta che utilizzeremo il comando <command>portsdb</command>
+      verr&agrave; generato il file <filename>/usr/ports/INDEX.db</filename>,
+      questo file &egrave; un database e pu&ograve; essere aggiornato ogni
+      volta che verr&agrave; eseguita l'utility <command>portsdb</command>.
+      &Egrave; buona norma utilizzare il comando <command>portsdb</command> solo
+      dopo aver proceduto all'aggiornamento dell'albero dei ports via CVSup, la
+      procedura del <command>portsdb</command> richiede diverso tempo per
+      essere completata con successo.  Molte utility installate con
+      <application>portupgrade</application> utilizzano il file
+      <filename>INDEX.db</filename> che non &egrave; un semplice file di
+      testo ma un database in formato <emphasis>Btree</emphasis> disegnato per
+      consentire di effettuare delle ricerce su vaste basi dati:</para>
+
+    <screen>&prompt.root; <userinput>file /usr/ports/INDEX.db</userinput>
+/usr/ports/INDEX.db: Berkeley DB 1.85/1.86 (Btree, version 3, native byte-order)</screen>
+
+    <para>Per comodit&agrave; si include uno script da inserire nelle procedure
+      periodiche, lo script esegue l'aggiornamento dell'albero dei port via
+      <application>CVSup</application> e procede con la manutenzione della base
+      dati:</para>
+
+    <programlisting>
+<![CDATA[#!/usr/local/bin/bash
+]]><![CDATA[#
+]]><![CDATA[# aggiorna i ports
+]]><![CDATA[/usr/local/bin/cvsup -g -L 2 /usr/local/etc/cvsup/ports-supfile
+]]><![CDATA[#
+]]><![CDATA[# tiene pulita la base dati dei ports
+]]><![CDATA[/usr/local/sbin/portsdb -uU
+]]><![CDATA[#
+]]><![CDATA[# EOF - Djspider8
+]]></programlisting>
+
+    <para>Utilizzando questo script possiamo programmare la nostra macchina
+      FreeBSD per aggiornare, giornalmente, settimanalmente o mensilmente,
+      l'albero dei port.  &Egrave; anche possibile verificare la
+      necessit&agrave; di aggiornare o meno un port grazie al comando
+      <command>portversion</command>:</para>
+
+    <screen>&prompt.root; <userinput>portversion -l "<"</userinput></screen>
+
+    <para>La stessa verifica pu&ograve; essere effettuata utilizzando in modo
+      intelligente l'utility di sistema &man.pkg.version.1;, infatti
+      possiamo fare in modo di ottenere via e-mail un report dettagliato
+      contenente l'elenco delle applicazioni da aggiornare:</para>
+
+    <screen>&prompt.root; <userinput>mkdir /etc/periodic/altre</userinput></screen>
+
+    <screen>&prompt.root; <userinput>ee /etc/periodic/altre/100.pkg_version.sh</userinput>
+........
+#!/usr/local/bin/bash
+#
+echo
+echo analizzo i pacchetti da aggiornare....
+echo
+/usr/sbin/pkg_version -vL\=
+#
+........
+........</screen>
+
+    <screen>&prompt.root; <userinput>chmode +x /etc/periodic/altre/100.pkg_version.sh</userinput></screen>
+
+    <para>A questo punto riprogrammiamo il <application>crontab</application>
+      per eseguire questa procedura il sabato di ogni settimana alle ore
+      06:05</para>
+
+    <programlisting>
+<![CDATA[# stampa il report dei pacchetti da aggiornare
+]]><![CDATA[05      6       *       *       6       root    /etc/periodic/altre/100.pkg_version.sh
+]]></programlisting>
+
+    <para>Di seguito un altro esempio del comando &man.portupgrade.1; che
+      &egrave; relativo all'aggiornamento del database
+      <emphasis>MySQL</emphasis>, in questo caso, per aggiornare il server di
+      database sar&agrave; necessario <quote>saltare</quote> l'aggiornamento
+      delle basi dati che dovranno naturalmente rimanere inalterate:</para>
+
+    <screen>&prompt.root; <userinput>portupgrade mysql* -m 'OVERWRITE_DB=yes' mysql-server</userinput></screen>
+
+    <para>Con la compilazione e l'installazione di
+      <application>portupgrade</application> si &egrave; anche proceduto alla
+      installazione di un altro comodissimo programma di utilit&agrave;
+      denominato <command>portsclean</command>.  Questa piccola e preziosa
+      applicazione pu&ograve; essere utilizzata per ripulire tutte le directory
+      temporanee che vengono generate automaticamente al momento della
+      compilazione e dell'installazione dei port.  L'utility
+      <command>portsclean</command> pu&ograve; rilevarsi particolarmente utile
+      per gli utenti che non dispongono di unit&agrave; a disco molto
+      capienti:</para>
+
+    <screen>&prompt.root; <userinput>portsclean -C</userinput>
+Cleaning out /usr/ports/*/*/work...
+Delete /usr/ports/www/links1/work
+Delete /usr/ports/textproc/xhtml/work
+Delete /usr/ports/textproc/sgmlformat/work
+Delete /usr/ports/textproc/sdocbook-xml/work
+Delete /usr/ports/textproc/scr2txt/work
+Delete /usr/ports/textproc/linuxdoc/work
+Delete /usr/ports/textproc/libxslt/work
+Delete /usr/ports/textproc/libxml2/work
+Delete /usr/ports/textproc/jade/work
+Delete /usr/ports/textproc/html/work
+Delete /usr/ports/textproc/dsssl-docbook-modular/work
+Delete /usr/ports/textproc/docproj/work
+Delete /usr/ports/textproc/docbook-xsl/work
+Delete /usr/ports/textproc/docbook-xml/work
+Delete /usr/ports/print/ghostscript-gnu/work
+Delete /usr/ports/graphics/scr2png/work
+Delete /usr/ports/graphics/peps/work
+Delete /usr/ports/graphics/netpbm/work
+Delete /usr/ports/graphics/jbigkit/work
+done.</screen>
+
+    <para>Ulteriori riferimenti ed approfondimenti sono anche disponibili in
+      lingua italiana e possono essere trovati nell'articolo <ulink
+        url="http://www.freebdi.org/modules.php?name=News&amp;file=article&amp;sid=8">Portupgrade
+        istruzioni per l'uso</ulink>, l'articolo originale in lingua inglese
+      reperibile alla URL <ulink
+        url="http://www.freebsddiary.org/portupgrade.php">http://www.freebsddiary.org/portupgrade.php</ulink>.</para>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

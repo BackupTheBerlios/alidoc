@@ -1,0 +1,616 @@
+<!--
+     The FreeBSD Italian Documentation Project
+-->
+
+<chapter id="kernel">
+  <title>Lavorare con il Kernel</title>
+
+  <sect1 id="kernel-intro">
+    <title>Preambolo</title>
+
+    <para>Il kernel &egrave; il cuore di ogni sistema operativo, come abbiamo
+      detto in precedenza il kernel si occupa principalmente di controllare i
+      processi di iterazione tra l'hardware e l'allocazione delle risorse del
+      sistema richieste da parte dei vari software installati nel sistema
+      stesso.  La shell, che &egrave; l'interprete dei comandi, consente agli
+      utenti e all'amministratore della macchina di interagire direttamente con
+      le funzionalit&agrave; del kernel.</para>
+
+    <programlisting>
+<![CDATA[|--------------------------|
+]]><![CDATA[|         Hardware         |
+]]><![CDATA[|--------------------------|
+]]><![CDATA[|          Kernel          |
+]]><![CDATA[|--------------------------|
+]]><![CDATA[|     Shell / Software     |
+]]><![CDATA[|--------------------------|
+]]><![CDATA[|          Utente          |
+]]><![CDATA[|--------------------------|
+]]></programlisting>
+
+    <para>Inoltre il kernel implementa anche avanzate funzionalit&agrave; di
+      networking che consentono al computer di comunicare con altri sistemi
+      attraverso le reti LAN (Local Area Network) o le reti WAN (Wide Area
+      Network) come Internet.  &Egrave; ragionevole pensare di compilare un
+      nuovo kernel di sistema solo quando sussistono alcune condizioni
+      particolari come:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Applicare alcune patch che risolvono importanti problemi di
+          sicurezza;</para>
+      </listitem>
+
+      <listitem>
+        <para>Ottenere supporto per nuovi device;</para>
+      </listitem>
+
+      <listitem>
+        <para>Aggiungere al kernel il supporto per altre device.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Molti dei riferimenti ufficiali riportati nei paragrafi seguenti sono
+      contenuti nel manuale di FreeBSD e possono essere consultati alla URL
+      <ulink
+        url="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/kernelconfig.html">http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/kernelconfig.html</ulink>.</para>
+
+    <para>Vediamo di seguito come procedere per compilare ed installare un nuovo
+      kernel su un sistema FreeBSD.</para>
+  </sect1>
+
+  <sect1 id="kernel-config">
+    <title>Il file di configurazione del kernel</title>
+
+    <para>Il file di configurazione del kernel &egrave; un semplice file di
+      testo che si trova nella directory
+      <filename>/usr/src/sys/i386/conf/</filename>, di seguito possiamo vedere
+      il contenuto di questa directory relativamente ad una FreeBSD
+      5.0-CURRENT:</para>
+
+    <screen>&prompt.root; <userinput>ls -l /usr/src/sys/i386/conf/</userinput>
+total 74
+-rw-r--r-- 1 root wheel  9002 Dec 31 06:35 GENERIC
+-rw-r--r-- 1 root wheel  2113 Dec  5 23:49 GENERIC.hints
+-rw-r--r-- 1 root wheel   253 Jul 15  2002 Makefile
+-rw-r--r-- 1 root wheel 33754 Nov  8 21:04 NOTES
+-rw-r--r-- 1 root wheel  8519 Oct 13 18:29 OLDCARD
+-rw-r--r-- 1 root wheel  3991 Jul 26  2002 gethints.awk</screen>
+
+    <para>Ecco il contenuto della directory
+      <filename>/usr/src/sys/i386/conf/</filename> relativamente a un sistema
+      FreeBSD 4.8-STABLE:</para>
+
+    <screen>&prompt.root; <userinput>ls -l /usr/src/sys/i386/conf/</userinput>
+total 136
+drwxr-xr-x   2 root  wheel     512 Aug  2 19:15 ./
+drwxr-xr-x  12 root  wheel     512 Jun  9 12:02 ../
+-rw-r--r--   1 root  wheel    9763 Apr 28 05:41 GENERIC
+-rw-r--r--   1 root  wheel  103685 Jul 17 18:41 LINT
+-rw-r--r--   1 root  wheel    9938 Jun  9 11:47 PICARD</screen>
+
+    <para>Il kernel che viene installato come default dal processo di
+      installazione e viene identificato dal file
+      <filename>/usr/src/sys/i386/conf/GENERIC</filename>.  Per individuare al
+      meglio le caratteristiche di un sistema &egrave; buona norma assegnare al
+      kernel lo stesso nome della macchina (&man.hostname.1;).  Nel nostro caso
+      abbiamo proceduto con la creazione di un file che identifichi in maniera
+      univoca il kernel per il sistema PICARD.  Copiamo ora il file
+      <filename>GENERIC</filename> in <filename>PICARD</filename>:</para>
+
+    <screen>&prompt.root; <userinput>cp /usr/src/sys/i386/conf/GENERIC /usr/src/sys/i386/conf/PICARD</userinput></screen>
+
+    <para>A questo punto possiamo visualizzare ed eventualmente modificare il
+      contenuto del file, in particolare ci soffermeremo su quelle linee che
+      possono essere di maggiore interesse per il nostro sistema.  Per evitare
+      la compilazione di inutili device, le svariate righe relative alla
+      configurazione dei device stessi, possono essere commentate con il simbolo
+      <literal>&num;</literal>.  Nel caso specifico l'host
+      <hostid role="hostname">Picard</hostid> &egrave; un sistema k6/3D 300Mhz,
+      il file <filename>PICARD</filename>, appena creato, definir&agrave; un
+      kernel ottimizzato per la nostra architettura:</para>
+
+    <programlisting>
+<![CDATA[machine i386 # si specifica l'architettura del sistema
+]]><![CDATA[cpu I586_CPU # supporto per processori di classe 586 (AMD k6)
+]]><![CDATA[ident PICARD # il nome del Kernel
+]]><![CDATA[maxusers 0   # controlla il numero di risorse disponibili (in questo caso in modo automatico)
+]]></programlisting>
+
+    <para>Come abbiamo detto, &egrave; anche possibile abilitare o disabilitare
+      alcune dispositivi addizionali, per esempio, possono essere disabilitati
+      alcuni controller SCSI, se non presente pu&ograve; essere disabilitato il
+      supporto USB oppure il supporto al firewire ed altro ancora.  Nel nostro
+      caso, l'host <hostid role="hostname">Picard</hostid> non ha periferiche
+      SCSI collegate.</para>
+
+    <para>Il file <filename>/usr/src/sys/i386/conf/NOTES</filename>, per le
+      versioni 5 e il file <filename>/usr/src/sys/i386/conf/LINT</filename>,
+      per le versioni 4-STABLE, contiene una lista di possibili configurazioni
+      del kernel che riguarda opzioni o device, i commenti ivi contenuti
+      spiegano tutte le funzionalit&agrave; relative.  Conclusa la fase di
+      modifica del <emphasis>custom kernel</emphasis>, che abbiamo costruito ad
+      immagine del nostro sistema di riferimento <hostid
+        role="hostname">Picard</hostid>, si procederemo con salvataggio del file
+      <filename>/usr/src/sys/i386/conf/PICARD</filename>.</para>
+  </sect1>
+
+  <sect1 id="kernel-src">
+    <title>Mantenere i sorgenti del sistema aggiornati</title>
+
+    <para>L'aggiornamento del kernel di sistema naturalmente dipende
+      direttamente dai sorgenti che compongono il sistema stesso, &egrave;
+      quindi possibile aggiornare tutti i sorgenti di un sistema FreeBSD.  Come
+      con l'albero dei port, anche la procedura di aggiornamento dei sorgenti
+      di sistema si basa sulle <quote>differenze</quote>.  Tali differenze
+      vengono riscontrate tra l'albero dei sorgenti, presenti sul sistema
+      locale, e l'albero dei sorgenti presenti sui server del progetto FreeBSD.
+      L'albero dei sorgenti e tutte le versioni di FreeBSD si suddividono
+      in:</para>
+
+    <orderedlist>
+      <listitem>
+        <para><emphasis>STABLE</emphasis> &egrave; l'albero dei sorgenti che
+          contiene le patch e gli aggiornamenti delle versioni stabili del
+          sistema operativo, si tratta di sistemi destinati alla
+          produzione.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis>CURRENT</emphasis> &egrave; l'albero dei sorgenti che i
+        programmatori di FreeBSD utilizzano nella versioni in fase di sviluppo
+        del sistema operativo, si tratta di sistemi destinati allo studio di
+        nuove funzionalit&agrave;.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>I sorgenti presenti sui server ufficiali del progetto FreeBSD sono
+      soggetti a continui aggiornamenti, le modifiche vengono effettuate da
+      parte di tutti gli sviluppatori del team di FreeBSD.  Tramite il sistema
+      del <application>CVS</application> (Concurrent Version Sistem), l'utente
+      finale trasferisce dai server di origine del progetto FreeBSD le patch,
+      gli aggiornamenti verranno automaticamente applicati ai sorgenti di
+      sistema presenti sul disco locale.</para>
+
+    <para>Vediamo ora come procedere per il sistema di aggiornamento tramite
+      <application>CVS</application>.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Se non si &egrave; ancora provveduto all'installazione dei
+          sorgenti del sistema &egrave; ora necessario muoversi in tal senso, la
+          procedura verr&agrave; avviata grazie al comodo programma di
+          installazione &man.sysinstall.8;, utilizzando questo applicativo
+          procederemo con l'opzione <guimenuitem>Configure - Do post-install
+            configuration of FreeBSD</guimenuitem>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Un altro applicativo necessario allo scopo &egrave; <filename
+            role="package">net/cvsup</filename>.
+          <application>CVSup</application> &egrave; una utility che consente di
+          distribuire e mantenere aggiornati un'insieme di file attraverso la
+          rete, pu&ograve; essere utilizzato per realizzare un'efficente ed
+          accurato sistema di mirroring che pu&ograve; essere relativo a
+          qualsiasi tipo di file, inclusi i sorgenti, i binari ed i link
+          simbolici.  Probabilmente gi&agrave; avremo installato
+          <application>CVSup</application> al momento dell'installazione del
+          sistema operativo, oppure avremo proceduto all'installazione del
+          <application>CVSup</application> nella fase di utilizzo della
+          procedura di aggiornamento dei port (vedi il <ulink
+            url="http://www.freebsd.org/doc/it_IT.ISO8859-15/books/handbook/cvsup.html">manuale
+            di FreeBSD</ulink>).  Se ancora non si &egrave; proceduto in tal
+          senso, anche in questo caso sar&agrave; necessario utilizzare il
+          programma &man.sysinstall.8; o compilare ed installare
+          <application>CVSup</application> direttamente dall'albero dei
+          port.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Prepariamo ora tutti i file di configurazione che ci consentiranno di
+      aggiornare i sorgenti del sistema partendo dagli esempi che abbiamo
+      installato con la procedura di installazione.  In particolare dovremo
+      confrontare il file <filename>/usr/share/examples/etc/make.conf</filename>
+      con il file <filename>/etc/make.conf</filename> che, in linea di massima,
+      dovrebbe gi&agrave; essere presente sul nostro sistema, per quanto
+      concerne la versione 4.8-STABLE il file da confrontare &egrave; contenuto
+      nella directory <filename>/etc/defaults/make.conf</filename>.</para>
+
+    <para>&Egrave; importante che ll file <filename>/etc/make.conf</filename>,
+      per consentire l'aggiornamento tramite <application>CVSup</application>,
+      contenga le seguenti direttive, nel caso le direttive vanno aggiunte a
+      quelle gi&agrave; presenti:</para>
+
+    <programlisting>
+<![CDATA[# CVSup update flags.
+]]><![CDATA[#
+]]><![CDATA[SUP_UPDATE= yes
+]]><![CDATA[#
+]]><![CDATA[SUP= /usr/local/bin/cvsup
+]]><![CDATA[SUPFLAGS= -g -L 2
+]]><![CDATA[SUPHOST= cvsup.uk.FreeBSD.org
+]]><![CDATA[SUPFILE= /usr/local/etc/cvsup/stable-supfile
+]]><![CDATA[PORTSSUPFILE= /usr/local/etc/cvsup/ports-supfile
+]]><![CDATA[DOCSUPFILE= /usr/local/etc/cvsup/doc-supfile
+]]></programlisting>
+
+    <para>Nell'esempio sopracitato notiamo che il file
+      <filename>/etc/make.conf</filename> fa riferimento ad alcuni altri file
+      aggiuntivi che sono relativi ai sorgenti, ai port e alla documentazione.
+      Per costruire questi file &egrave; necessario fare riferimento agli esempi
+      contenuti nella directory <filename>/usr/share/examples/cvsup/</filename>,
+      se necessario copiamo questi file nella directory
+      <filename>/usr/local/etc/cvsup</filename>.</para>
+
+    <para>In particolare il file <filename>stable-supfile</filename> individua i
+      sorgenti del ramo STABLE, gli altri file sono
+      <filename>ports-supfile</filename> che consente l'aggiornamento
+      dell'albero dei port e <filename>doc-supfile</filename> che consente
+      l'aggiornamento della documentazione.  Di seguito vediamo il contenuto dei
+      file di esempio che abbiamo citato in precedenza.</para>
+
+    <para>Il file <filename>stable-supfile</filename>:</para>
+
+    <programlisting>
+<![CDATA[# /usr/local/etc/cvsup/stable-supfile
+]]><![CDATA[*default host=cvsup.uk.FreeBSD.org
+]]><![CDATA[*default base=/usr
+]]><![CDATA[*default prefix=/usr
+]]><![CDATA[# linea successiva per la versione 4-stable
+]]><![CDATA[*default release=cvs tag=RELENG_4
+]]><![CDATA[# potrebbe rendersi necessario aggiornare il sistema ad una certa data
+]]><![CDATA[# in tale ipotesi dovra' essere sostituita la tag *default release con
+]]><![CDATA[# *default release=cvs tag=RELENG_4 date=2003.08.20.00.00.00
+]]><![CDATA[#
+]]><![CDATA[*default delete use-rel-suffix
+]]><![CDATA[# If your network link is a T1 or faster, comment out the following line.
+]]><![CDATA[*default compress
+]]><![CDATA[## Main Source Tree.
+]]><![CDATA[#
+]]><![CDATA[# The easiest way to get the main source tree is to use the "src-all"
+]]><![CDATA[# mega-collection. It includes all of the individual "src-*" collections.
+]]><![CDATA[src-all
+]]></programlisting>
+
+    <para>Il file <filename>ports-supfile</filename>:</para>
+
+    <programlisting>
+<![CDATA[# /usr/local/etc/cvsup/ports-supfile
+]]><![CDATA[*default host=cvsup.uk.FreeBSD.org
+]]><![CDATA[*default base=/usr
+]]><![CDATA[*default prefix=/usr
+]]><![CDATA[*default release=cvs tag=.
+]]><![CDATA[*default delete use-rel-suffix
+]]><![CDATA[# If your network link is a T1 or faster, comment out the following line.
+]]><![CDATA[*default compress
+]]><![CDATA[## Ports Collection.
+]]><![CDATA[#
+]]><![CDATA[# The easiest way to get the ports tree is to use the "ports-all"
+]]><![CDATA[# mega-collection. It includes all of the individual "ports-*"
+]]><![CDATA[# collections,
+]]><![CDATA[ports-all
+]]></programlisting>
+
+    <para>Il file <filename>doc-supfile</filename>:</para>
+
+    <programlisting>
+<![CDATA[# /usr/local/etc/cvsup/doc-supfile
+]]><![CDATA[*default host=cvsup.uk.FreeBSD.org
+]]><![CDATA[*default base=/usr
+]]><![CDATA[*default prefix=/usr
+]]><![CDATA[#
+]]><![CDATA[# "tag" in the next line should always either be "." to receive the most
+]]><![CDATA[# up-to-date files, or left blank (i.e., "*default release=cvs") to receive
+]]><![CDATA[# the CVS ,v files. The doc collection is not branched.
+]]><![CDATA[#
+]]><![CDATA[*default release=cvs tag=.
+]]><![CDATA[*default delete use-rel-suffix
+]]><![CDATA[#
+]]><![CDATA[# If your network link is a T1 or faster, comment out the following line.
+]]><![CDATA[*default compress
+]]><![CDATA[#
+]]><![CDATA[# This will retrieve the entire doc branch of the FreeBSD repository.
+]]><![CDATA[# This includes the handbook, FAQ, and translations thereof.
+]]><![CDATA[doc-all
+]]></programlisting>
+
+    <para>Accertiamoci di aver salvato tutti i file di configurazione, non
+      dimentichiamo che questi file saranno importantissimi anche nella gestione
+      del sistema di aggiornamento chiamato in gergo world di FreeBSD che
+      vedremo in seguito.  A questo punto possiamo finalmente aggiornare i
+      sorgenti del sistema, la struttura dell'albero dei port e i sorgenti
+      della documentazione.  Sar&agrave; sufficente impartire pochi comandi per
+      iniziare la procedura.</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/src</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make update</userinput></screen>
+  </sect1>
+
+  <sect1 id="kernel-refuse-file">
+    <title>Il file <filename>refuse</filename></title>
+
+    <para>Il file <filename>refuse</filename> indica al programma &man.cvsup.1;
+      quali sono quelle parti di CVS che non dovranno essere aggiornate, in
+      altre parole il file <filename>refuse</filename> indica al client
+      &man.cvsup.1; cosa non prelevare dai server del progetto FreeBSD.  Il file
+      <filename>refuse</filename>, per divenite immediatamente funzionante, deve
+      essere memorizzato nella directory <filename>/usr/sup/</filename> e al suo
+      interno non deve contenere commenti.</para>
+
+    <programlisting>
+<![CDATA[ports/chinese
+]]><![CDATA[ports/french
+]]><![CDATA[ports/german
+]]><![CDATA[ports/hebrew
+]]><![CDATA[ports/japanese
+]]><![CDATA[ports/hungarian
+]]><![CDATA[ports/korean
+]]><![CDATA[ports/portuguese
+]]><![CDATA[ports/russian
+]]><![CDATA[ports/ukrainian
+]]><![CDATA[ports/vietnamese
+]]><![CDATA[doc/de_DE.ISO8859-1
+]]><![CDATA[doc/el_GR.ISO8859-7
+]]><![CDATA[doc/es_ES.ISO8859-1
+]]><![CDATA[doc/fr_FR.ISO8859-1
+]]><![CDATA[doc/ja_JP.eucJP
+]]><![CDATA[doc/nl_NL.ISO8859-1
+]]><![CDATA[doc/pt_BR.ISO8859-1
+]]><![CDATA[doc/ru_RU.KOI8-R
+]]><![CDATA[doc/sr_YU.ISO8859-2
+]]><![CDATA[doc/zh_TW.Big5
+]]></programlisting>
+  </sect1>
+
+  <sect1 id="kernel-build">
+    <title>Compilare il nuovo kernel</title>
+
+    <para>Dopo aver creato un file di configurazione del kernel custom con il
+      e dopo aver sincronizzato l'albero dei sorgenti tramite
+      <application>CVS</application>, possiamo teoricamente procedere con la
+      compilazione e l'installazione del nuovo kernel.</para>
+
+    <para>Spesso i binari di sistema devo andare di pari passo con i binari del
+      kernel e quindi in alcuni casi la compilazione di un nuovo kernel implica
+      una precedente compilazione di alcune parti del sistema (spesso tutti i
+      sorgenti di sistema).  Citiamo ora alcune informazioni che ci
+      consentiranno di preparare una rebuild del kernel di sistema.
+      Posizioniamoci nella directory <filename>/usr/src</filename> e digitiamo
+      i seguenti comandi:</para>
+
+    <screen>&prompt.root; <userinput>cd /usr/src</userinput></screen>
+
+    <screen>&prompt.root; <userinput>make buildkernel KERNCONF=PICARD</userinput></screen>
+
+    <para>Dopo aver digitato e confermato i comandi di cui sopra, il processo
+      di compilazione del kernel di FreeBSD controlla il file di configurazione
+      verificando che lo stesso sia valido, inoltre controlla che non siano
+      stati commessi degli errori, sia per quello che concerne la sintassi del
+      file di configurazione del kernel, che a riguardo di eventuali operazioni
+      illegali.</para>
+
+    <para>I tempi di compilazione del nuovo kernel dipendono molto dal tipo di
+      macchina utilizzata, sul nostro sistema di esempio, <hostid
+        role="hostname">Picard</hostid>, con un K6-3D a 300 Mhz, la compilazione
+      &egrave; durata poco meno di 2 ore.</para>
+
+    <programlisting>
+<![CDATA[--------------------------------------------------------------
+]]><![CDATA[>>> Kernel build for PICARD completed on Wed Apr 9 19:08:09 CEST 2003
+]]><![CDATA[--------------------------------------------------------------
+]]></programlisting>
+  </sect1>
+
+  <sect1 id="kernel-install">
+    <title>Installare il nuovo kernel</title>
+
+    <para>Al termine del processo di compilazione, salvo errori, il nuovo
+      kernel &egrave; pronto per essere installato sul nostro sistema.
+      Utilizziamo ancora una volta dei semplici comandi di shell per procedere
+      con l'installazione del nuovo kernel.  Vediamo nel dettaglio
+      come procedere per installare il nuovo kernel:</para>
+
+    <screen>&prompt.root; <userinput>make installkernel KERNCONF=PICARD</userinput></screen>
+
+    <para>Nel caso si stia lavorando con una versione 4.8-STABLE il nuovo
+      kernel verr&agrave; salvato in <filename>/kernel</filename>
+      mentre il vecchio kernel verr&agrave; memorizzato in
+      <filename>/kernel.old</filename>.  Per quello che concerne la versione
+      5.0 e successive, il nuovo kernel verr&agrave; installato nella
+      directory <filename>/boot/kernel</filename> ed il vecchio kernel
+      verr&agrave; invece copiato nella directory
+      <filename>/boot/kernel.old</filename>.</para>
+
+    <para>L'operazione di installazione del nuovo kernel consentir&agrave; di
+      avere sempre disponibile un kernel <quote>di recupero</quote>
+      (denominato anche <quote>resque kernel</quote>) che eventualmente
+      potr&agrave; essere utilizzato per ripristinare il sistema operativo in
+      caso di eventuali errori.</para>
+
+    <para>Se il nuovo kernel non dovesse essere caricato durante il processo
+      boot o generer&agrave; dei messaggi del tipo <emphasis>Kernel
+        panic</emphasis>, sar&agrave; comunque possibile ritornare alla
+      precedente versione di <quote>resque kernel</quote> (kernel precedente al
+      processo di compilazione e di installazione).</para>
+
+    <para>Ora possiamo riavviare il sistema sperando che la procedura sia andata
+      in porto senza problemi (iniziare a pregare.....;-)).</para>
+
+    <para>Nel nostro caso avremo un nuovo kernel personalizzato:</para>
+
+    <programlisting>
+<![CDATA[Last login: Wed Apr 9 19:24:40 2003
+]]><![CDATA[Copyright (c) 1980, 1983, 1986, 1988, 1990, 1991, 1993, 1994
+]]><![CDATA[The Regents of the University of California. All rights reserved.
+]]><![CDATA[FreeBSD 5.0-RELEASE-p7 (PICARD) #0: Wed Apr 9 18:13:26 CEST 2003
+]]></programlisting>
+  </sect1>
+
+  <sect1 id="kernel-reque">
+    <title>Recuperare un vecchio kernel</title>
+
+    <para>Come abbiamo detto prima, uno dei problemi maggiori pu&ograve; essere
+      il famigerato <emphasis>kernel panic</emphasis>, per eseguire il boot del
+      sistema utilizzando il vecchio kernel sar&agrave; necessario riavviare
+      la macchina.</para>
+
+    <para>Al prompt di sistema, nel momento in cui viene avviato il conteggio
+      dei 10 secondi che precedono il processo di boot, sar&agrave; possibile
+      interrompere il processo premendo qualsiasi tasto ad eccezione di
+      <keycap>Invio</keycap>.  Nel caso si tratti di una versione 5.0 o
+      successiva, al prompt dei comandi sar&agrave; necessario digitare il
+      seguente comando.</para>
+
+    <programlisting>
+<![CDATA[# boot /boot/kernel.old
+]]></programlisting>
+
+    <para>&Egrave; possibile eseguire il boot di sistema anche utilizzando altre
+      versioni del kernel, &egrave; fondamentale quindi aver precedentemente
+      memorizzato le varie versioni del kernel ricorrendo all'utilizzo di nomi
+      diversi, per esempio <filename>/boot/kernel1.old</filename>.</para>
+
+    <para>Nel caso si stia utilizzando FreeBSD 4.7-STABLE o 4.8-STABLE, il
+      nuovo kernel verr&agrave; copiato nella directory di root con il nome
+      <filename>/kernel</filename>, il vecchio kernel verr&agrave; rinominato in
+      <filename>/kernel.old</filename>.</para>
+
+    <programlisting>
+<![CDATA[-r-xr-xr-x   1 root  wheel  4227598 Aug 18 20:54 kernel*
+]]><![CDATA[-r-xr-xr-x   1 root  wheel  4122347 Apr  3 12:53 kernel.GENERIC*
+]]><![CDATA[-r-xr-xr-x   1 root  wheel  4184781 May  4 20:42 kernel.old*
+]]></programlisting>
+
+    <para>Nell'esempio possiamo notare un file monolitico del kernel del 18
+      Agosto, il file relativo al vecchio kernel &egrave; del 4 Maggio mentre
+      il file relativo del kernel generico &egrave; del 3 Aprile 2003.  Nel caso
+      in cui qualcosa dovesse essere andato male forniamo di seguito alcune
+      informazioni che ci consentiranno di ripristinare il sistema.</para>
+
+    <para>Fortunatamente FreeBSD &egrave; stato concepito con un eccellente
+      meccanismo di recupero del sistema nel caso in cui si dovessero
+      presentare alcune improbabili incompatibilit&agrave; tra il sistema
+      stesso ed il kernel appena compilato ed installato.  Per quanto concerne
+      la versione 4.8-STABLE sar&agrave; infatti sufficente selezionare il
+      tipo di kernel desiderato servendosi del boot loader di FreeBSD.  Potremo
+      accedere direttamente al boot loader di sistema nel momento in cui
+      la macchina si appresta ad eseguire il conteggio di avvio da 0 a 10
+      utilizzando un semplice tasto, ad eccezione di <keycap>Invio</keycap>.
+      Per avviare il vecchio kernel dovremmo digitare i seguenti comandi:</para>
+
+    <screen>&prompt.root; <userinput>unload</userinput></screen>
+
+    <screen>&prompt.root; <userinput>boot kernel.old</userinput></screen>
+
+    <para>In alternativa potremmo anche digitare il nome del file che abbiamo
+      assegnato in precedenza al vecchio kernel.</para>
+  </sect1>
+
+  <sect1 id="kernel-file">
+    <title>Maneggiare i file del kernel</title>
+
+    <para>Pu&ograve; risultare utile essere in grado di lavorare con i file del
+      kernel, vediamo di seguito alcune operazioni che ci consentiranno di
+      gestire al meglio questi file, per maggiori dettagli riferirsi alla URL
+      <ulink
+        url="http://www.freebsdhowtos.com/98.html">http://www.freebsdhowtos.com/98.html</ulink>.</para>
+
+    <screen>&prompt.root; <userinput>cd /</userinput></screen>
+
+    <screen>&prompt.root; <userinput>chmod 777 kernel</userinput>
+ chmod: kernel: Operation not permitted
+.......
+.......</screen>
+
+    <screen>&prompt.root; <userinput>chmod 777 kernel.old</userinput></screen>
+
+    <screen>&prompt.root; <userinput>cp kernel.old kernel.maggio</userinput></screen>
+
+    <screen>&prompt.root; <userinput>ls kernel*</userinput>
+ -r-xr-xr-x  1 root  wheel  4227598 Aug 18 20:54 kernel*
+-r-xr-xr-x  1 root  wheel  4122347 Apr  3 12:53 kernel.GENERIC*
+-rwxr-xr-x  1 root  wheel  4184781 Aug 22 14:04 kernel.maggio*
+-rwxrwxrwx  1 root  wheel  4184781 May  4 20:42 kernel.old*
+.......
+.......</screen>
+
+    <screen>&prompt.root; <userinput>chmod 555 kernel.old</userinput></screen>
+
+    <screen>&prompt.root; <userinput>cp kernel.old kernel.maggio</userinput></screen>
+
+    <screen>&prompt.root; <userinput>ls -l kernel*</userinput>
+-r-xr-xr-x  1 root  wheel  4227598 Aug 18 20:54 kernel*
+-r-xr-xr-x  1 root  wheel  4122347 Apr  3 12:53 kernel.GENERIC*
+-rwxr-xr-x  1 root  wheel  4184781 Aug 22 14:09 kernel.maggio*
+-r-xr-xr-x  1 root  wheel  4184781 May  4 20:42 kernel.old*</screen>
+
+    <para>Abbiamo provato a modificare i permessi di accesso al file
+      <filename>/kernel</filename> ottenendo il messaggio <quote>operazione non
+        permessa</quote>.  Per capire il motivo per cui, pur essendo accreditati
+      dei massimi poteri di gestione del sistema, non siamo stati autorizzati a
+      modificare quel file, possiamo visualizzare il contenuto della directory
+      in maniera diversa grazie al comando &man.ls.1; con l'opzione
+      <option>-o</option> che ci consentir&agrave; di visualizzare i file in
+      modalit&agrave; estesa.</para>
+
+    <screen>&prompt.root; <userinput>ls -lo kernel*</userinput>
+-r-xr-xr-x  1 root  wheel  schg 4227598 Aug 18 20:54 kernel*
+-r-xr-xr-x  1 root  wheel  -    4122347 Apr  3 12:53 kernel.GENERIC*
+-rwxr-xr-x  1 root  wheel  -    4184781 Aug 22 14:09 kernel.maggio*
+-r-xr-xr-x  1 root  wheel  -    4184781 May  4 20:42 kernel.old*</screen>
+
+    <para>Il file <filename>/kernel</filename> ha il flag
+      <literal>schg</literal> settato, questo flag viene comunemente utilizzato
+      per prevenire la sostituzione accidentale del kernel stesso e pu&ograve;
+      essere modificato utilizzando l'utility &man.chflags.1;.</para>
+
+    <screen>&prompt.root; <userinput>chflags noschg kernel</userinput></screen>
+
+    <screen>&prompt.root; <userinput>ls -lo kernel</userinput>
+-r-xr-xr-x  1 root  wheel  - 4227598 Aug 18 20:54 kernel*
+.......
+.......</screen>
+
+    <screen>&prompt.root; <userinput>chflags schg kernel</userinput></screen>
+
+    <screen>&prompt.root; <userinput>ls -lo kernel</userinput>
+-r-xr-xr-x  1 root  wheel  schg 4227598 Aug 18 20:54 kernel*</screen>
+
+    <para>Le seguenti indicazioni sono particolarmente importati per il
+      kernel di FreeBSD 4.8-STABLE che &egrave; un unico file monolitico, il
+      kernel di FreeBSD 5.0 e versioni successive viene memorizzato nella
+      directory <filename>/boot/kernel</filename> e, come abbiamo visto, si
+      compone di diversi file.</para>
+  </sect1>
+
+  <sect1 id="kernel-disadvantages">
+    <title>Piccoli inconvenienti</title>
+
+    <para>Si possono incontrare alcuni problemi dopo aver installato il kernel.
+      Alcune utility di sistema come &man.ps.1; potrebbero smettere di
+      funzionare, questo problema pu&ograve; verificarsi quando la versione del
+      kernel che stiamo utilizzando non &egrave; perfettamente sincronizzata
+      con il resto del sistema.</para>
+
+    <para>In tal caso sar&agrave; necessario effettuare il refresh dei sorgenti
+      utilizzando <application>CVSup</application> per poi effettuare una
+      rebuild di sistema e sincronizzarlo con l'attuale versione del kernel.
+      Nei capitoli successivi vedremo come procedere per eseguire il build
+      (world) dell'intero sistema operativo.  I file generati dal processo di
+      compilazione vengono memorizzati nella directory
+      <filename>/usr/obj/usr/</filename> e, se non dovranno essere riutilizzati
+      per il rebuild di altri sistemi, potranno essere tranquillamente
+      rimossi.</para>
+  </sect1>
+</chapter>
+
+<!--
+     Local Variables:
+     mode: sgml
+     sgml-indent-data: t
+     sgml-omittag: nil
+     sgml-always-quote-attributes: t
+     sgml-parent-document: ("../book.sgml" "book" "chapter")
+     End:
+-->

@@ -1,0 +1,11 @@
+<!--
+     The FreeBSD Italian Documentation Project
+
+     DocBook Language Specific Entities per la Localizzazione.
+
+     $FreeBSD: doc/it_IT.ISO8859-15/share/sgml/l10n.ent,v 1.1 2003/07/06 21:17:59 blackend Exp $
+     Original revision: 1.1
+-->
+
+<!ENTITY docnavi.single-html "HTML Singolo">
+<!ENTITY docnavi.split-html  "HTML Multiplo">
